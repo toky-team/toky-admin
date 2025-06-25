@@ -1,4 +1,5 @@
 import { HealthSummary } from '~/features/health/components/health-summary';
+import { UserSummary } from '~/features/user/components/user-summary';
 import PageContainer from '~/shared/components/page-container';
 import { Card } from '~/shared/ui/card';
 import { PageTitle } from '~/shared/ui/page-title';
@@ -9,6 +10,7 @@ export default function HomePage() {
       <PageTitle>DashBoard</PageTitle>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <HealthSummary />
+        <UserSummary />
         {/* 여기에 추가 컴포넌트들 배치 */}
         <Card>
           <p className="text-sm font-semibold">📅 일정 요약</p>
