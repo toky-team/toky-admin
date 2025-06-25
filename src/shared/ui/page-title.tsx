@@ -3,5 +3,5 @@ type PageTitleProps = {
 };
 
 export function PageTitle({ children }: PageTitleProps) {
-  return <h1 className="text-3xl font-bold text-foreground mb-6">{children}</h1>;
+  return <h1 className="text-3xl font-bold text-foreground mb-6 px-4">{children}</h1>;
 }
