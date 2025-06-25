@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-background text-foreground font-sans antialiased;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  @apply text-primary hover:underline;
+}
+
+button {
+  @apply font-medium;
+}
+
+button, a {
+  cursor: pointer;
+}
+
+input, textarea, select {
+  @apply bg-surface text-foreground border border-border rounded-md px-3 py-2 outline-none;
+}
+
+input:focus, textarea:focus, select:focus {
+  @apply ring-2 ring-primary;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-bold text-foreground;
+}
+
+p {
+  @apply text-foreground leading-relaxed;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #4B5563;
+  border-radius: 4px;
+}
