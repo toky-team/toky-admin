@@ -2,19 +2,12 @@ import { useState } from 'react';
 
 import { useScore } from '~/features/score/hooks/use-score';
 import { MatchStatus } from '~/features/score/types/match-status';
-import { Sport } from '~/features/score/types/sport';
+import { emojiMap, Sport } from '~/shared/types/sport';
 import { Button } from '~/shared/ui/button';
 import { Card } from '~/shared/ui/card';
 import { Input } from '~/shared/ui/input';
 
 const sports = Object.values(Sport);
-const emojiMap: Record<Sport, string> = {
-  [Sport.FOOTBALL]: '⚽️',
-  [Sport.BASKETBALL]: '🏀',
-  [Sport.BASEBALL]: '⚾️',
-  [Sport.RUGBY]: '🏉',
-  [Sport.ICE_HOCKEY]: '🏒',
-};
 
 export function ScoreManager() {
   const [selectedSport, setSelectedSport] = useState<Sport>(Sport.FOOTBALL);

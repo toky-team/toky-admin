@@ -7,3 +7,11 @@ export const Sport = {
 } as const;
 
 export type Sport = (typeof Sport)[keyof typeof Sport];
+
+export const emojiMap: Record<Sport, string> = {
+  [Sport.FOOTBALL]: '⚽️',
+  [Sport.BASKETBALL]: '🏀',
+  [Sport.BASEBALL]: '⚾️',
+  [Sport.RUGBY]: '🏉',
+  [Sport.ICE_HOCKEY]: '🏒',
+};

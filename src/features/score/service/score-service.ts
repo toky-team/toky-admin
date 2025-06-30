@@ -1,6 +1,6 @@
 import type { Score } from '~/features/score/types/score';
-import type { Sport } from '~/features/score/types/sport';
 import api from '~/shared/lib/api';
+import type { Sport } from '~/shared/types/sport';
 
 export const getScore = async (sport: Sport) => {
   return await api.get<Score>('/score', {

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { endMatch, getScore, resetMatch, startMatch, updateScore } from '~/features/score/service/score-service';
 import type { Score } from '~/features/score/types/score';
-import { Sport } from '~/features/score/types/sport';
+import { Sport } from '~/shared/types/sport';
 
 export function useScore() {
   const [scores, setScores] = useState<Record<Sport, Score | null>>({

@@ -1,5 +1,5 @@
 import type { MatchStatus } from '~/features/score/types/match-status';
-import type { Sport } from '~/features/score/types/sport';
+import type { Sport } from '~/shared/types/sport';
 
 export interface Score {
   sport: Sport;
