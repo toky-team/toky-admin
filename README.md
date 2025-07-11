@@ -111,3 +111,6 @@ React, Vite, Zustand, Axios, Tailwind
 - 경기 점수
   - 경기 상태 변경
   - 점수 업데이트
+
+- 베팅 질문
+  - 질문 및 답변 수정
