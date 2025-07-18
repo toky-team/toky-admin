@@ -5,6 +5,7 @@ const navItems = [
   { label: '홈', to: '/' },
   { label: '경기 점수 관리', to: '/score' },
   { label: '베팅 문항 관리', to: '/question' },
+  { label: '선수 관리', to: '/player' },
 ];
 
 interface SidebarProps {
