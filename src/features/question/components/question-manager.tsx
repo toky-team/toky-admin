@@ -98,7 +98,7 @@ export function QuestionManager() {
       {/* 에러 메시지 */}
       {error && (
         <Card className="p-4 border-red-200 bg-red-50">
-          <p className="text-red-500 text-sm">⚠️ 에러가 발생했습니다</p>
+          <p className="text-red-500 text-sm">⚠️ 에러가 발생했습니다: {error.message}</p>
         </Card>
       )}
 

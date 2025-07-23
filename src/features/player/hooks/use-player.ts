@@ -200,6 +200,7 @@ export function usePlayer() {
       fetchAll();
     }, 30000); // 30초마다 갱신
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

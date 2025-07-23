@@ -86,7 +86,7 @@ export function ScoreManager() {
           )}
         </div>
 
-        {error && <p className="text-red-500 text-sm">⚠️ 에러가 발생했습니다</p>}
+        {error && <p className="text-red-500 text-sm">⚠️ 에러가 발생했습니다: {error.message}</p>}
         {!score ? (
           <p className="text-sm text-muted">⏳ 점수 불러오는 중...</p>
         ) : (
