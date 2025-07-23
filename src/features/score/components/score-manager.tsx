@@ -17,8 +17,8 @@ export function ScoreManager() {
 
   const matchStatus = score?.matchStatus;
 
-  const [ku, setKu] = useState(0);
-  const [yu, setYu] = useState(0);
+  const [ku, setKu] = useState('0');
+  const [yu, setYu] = useState('0');
 
   const handleStartClick = () => {
     handleStart(selectedSport);
@@ -29,13 +29,29 @@ export function ScoreManager() {
   };
 
   const handleResetClick = () => {
-    setKu(0);
-    setYu(0);
+    setKu('0');
+    setYu('0');
     handleReset(selectedSport);
   };
 
   const handleUpdateClick = () => {
-    handleUpdate(selectedSport, ku, yu);
+    handleUpdate(selectedSport, Number(ku), Number(yu));
+  };
+
+  const handleKuChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // 빈 문자열이거나 0 이상의 정수만 허용
+    if (value === '' || (/^\d+$/.test(value) && Number(value) >= 0)) {
+      setKu(value);
+    }
+  };
+
+  const handleYuChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // 빈 문자열이거나 0 이상의 정수만 허용
+    if (value === '' || (/^\d+$/.test(value) && Number(value) >= 0)) {
+      setYu(value);
+    }
   };
 
   return (
@@ -99,28 +115,20 @@ export function ScoreManager() {
             <div className="flex flex-col sm:flex-row justify-center gap-4 items-center mt-4">
               <div className="flex gap-2 items-center">
                 <Input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   disabled={matchStatus !== MatchStatus.IN_PROGRESS}
-                  min={0}
-                  step={1}
                   value={ku}
-                  onChange={(e) => {
-                    const val = Math.max(0, Math.floor(Number(e.target.value)));
-                    setKu(val);
-                  }}
+                  onChange={handleKuChange}
                   className="w-24 text-center"
                   placeholder="KU 점수"
                 />
                 <Input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   disabled={matchStatus !== MatchStatus.IN_PROGRESS}
-                  min={0}
-                  step={1}
                   value={yu}
-                  onChange={(e) => {
-                    const val = Math.max(0, Math.floor(Number(e.target.value)));
-                    setYu(val);
-                  }}
+                  onChange={handleYuChange}
                   className="w-24 text-center"
                   placeholder="YU 점수"
                 />

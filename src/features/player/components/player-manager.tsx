@@ -27,10 +27,10 @@ export function PlayerManager() {
     sport: Sport;
     department: string;
     birth: string;
-    height: number;
-    weight: number;
+    height: string;
+    weight: string;
     position: string;
-    backNumber: number;
+    backNumber: string;
     image: File | null;
   }>({
     name: '',
@@ -38,10 +38,10 @@ export function PlayerManager() {
     sport: selectedSport,
     department: '',
     birth: '',
-    height: 0,
-    weight: 0,
+    height: '',
+    weight: '',
     position: '',
-    backNumber: 0,
+    backNumber: '',
     image: null as File | null,
   });
 
@@ -57,6 +57,15 @@ export function PlayerManager() {
     // Convert YYYY-MM-DD to YYYY.MM.DD for storage
     return inputDate.replace(/-/g, '.');
   };
+
+  const handleNumberChange =
+    (field: 'height' | 'weight' | 'backNumber') => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      // 빈 문자열이거나 양수만 허용
+      if (value === '' || (/^\d+$/.test(value) && Number(value) > 0)) {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+      }
+    };
 
   const togglePlayerExpansion = (playerId: string) => {
     setExpandedPlayerIds((prev) => {
@@ -78,10 +87,10 @@ export function PlayerManager() {
       sport: selectedSport,
       department: '',
       birth: '',
-      height: 0,
-      weight: 0,
+      height: '',
+      weight: '',
       position: '',
-      backNumber: 0,
+      backNumber: '',
       image: null,
     });
   };
@@ -94,10 +103,10 @@ export function PlayerManager() {
       sport: player.sport,
       department: player.department,
       birth: formatDateForInput(player.birth),
-      height: player.height,
-      weight: player.weight,
+      height: player.height.toString(),
+      weight: player.weight.toString(),
       position: player.position,
-      backNumber: player.backNumber,
+      backNumber: player.backNumber.toString(),
       image: null,
     });
   };
@@ -111,10 +120,10 @@ export function PlayerManager() {
       sport: selectedSport,
       department: '',
       birth: '',
-      height: 0,
-      weight: 0,
+      height: '',
+      weight: '',
       position: '',
-      backNumber: 0,
+      backNumber: '',
       image: null,
     });
   };
@@ -125,7 +134,11 @@ export function PlayerManager() {
       return;
     }
 
-    if (formData.height <= 0 || formData.weight <= 0 || formData.backNumber <= 0) {
+    const height = Number(formData.height);
+    const weight = Number(formData.weight);
+    const backNumber = Number(formData.backNumber);
+
+    if (height <= 0 || weight <= 0 || backNumber <= 0) {
       alert('키, 몸무게, 등번호는 0보다 큰 값이어야 합니다.');
       return;
     }
@@ -141,10 +154,10 @@ export function PlayerManager() {
         sport: formData.sport,
         department: formData.department,
         birth: formatDateForStorage(formData.birth),
-        height: formData.height,
-        weight: formData.weight,
+        height,
+        weight,
         position: formData.position,
-        backNumber: formData.backNumber,
+        backNumber,
         image: formData.image,
       });
     } else if (editingPlayerId) {
@@ -154,10 +167,10 @@ export function PlayerManager() {
         sport: formData.sport,
         department: formData.department,
         birth: formatDateForStorage(formData.birth),
-        height: formData.height,
-        weight: formData.weight,
+        height,
+        weight,
         position: formData.position,
-        backNumber: formData.backNumber,
+        backNumber,
         image: formData.image ?? undefined,
       });
     }
@@ -287,33 +300,36 @@ export function PlayerManager() {
                 <Label htmlFor="backNumber">등번호 *</Label>
                 <Input
                   id="backNumber"
-                  type="number"
-                  min="1"
+                  type="text"
+                  inputMode="numeric"
                   value={formData.backNumber}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, backNumber: Number(e.target.value) }))}
+                  onChange={handleNumberChange('backNumber')}
                   placeholder="등번호"
+                  className="[&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               <div>
                 <Label htmlFor="height">키 (cm) *</Label>
                 <Input
                   id="height"
-                  type="number"
-                  min="1"
+                  type="text"
+                  inputMode="numeric"
                   value={formData.height}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, height: Number(e.target.value) }))}
+                  onChange={handleNumberChange('height')}
                   placeholder="키"
+                  className="[&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               <div>
                 <Label htmlFor="weight">몸무게 (kg) *</Label>
                 <Input
                   id="weight"
-                  type="number"
-                  min="1"
+                  type="text"
+                  inputMode="numeric"
                   value={formData.weight}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, weight: Number(e.target.value) }))}
+                  onChange={handleNumberChange('weight')}
                   placeholder="몸무게"
+                  className="[&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               <div className="md:col-span-2">
@@ -402,35 +418,36 @@ export function PlayerManager() {
                                 <Label htmlFor="edit-backNumber">등번호 *</Label>
                                 <Input
                                   id="edit-backNumber"
-                                  type="number"
+                                  type="text"
+                                  inputMode="numeric"
                                   value={formData.backNumber}
-                                  onChange={(e) =>
-                                    setFormData((prev) => ({ ...prev, backNumber: Number(e.target.value) }))
-                                  }
+                                  onChange={handleNumberChange('backNumber')}
                                   placeholder="등번호"
-                                  className="text-sm"
+                                  className="text-sm [&::-webkit-inner-spin-button]:appearance-none"
                                 />
                               </div>
                               <div>
                                 <Label htmlFor="edit-height">키 (cm) *</Label>
                                 <Input
                                   id="edit-height"
-                                  type="number"
+                                  type="text"
+                                  inputMode="numeric"
                                   value={formData.height}
-                                  onChange={(e) => setFormData((prev) => ({ ...prev, height: Number(e.target.value) }))}
+                                  onChange={handleNumberChange('height')}
                                   placeholder="키"
-                                  className="text-sm"
+                                  className="text-sm [&::-webkit-inner-spin-button]:appearance-none"
                                 />
                               </div>
                               <div>
                                 <Label htmlFor="edit-weight">몸무게 (kg) *</Label>
                                 <Input
                                   id="edit-weight"
-                                  type="number"
+                                  type="text"
+                                  inputMode="numeric"
                                   value={formData.weight}
-                                  onChange={(e) => setFormData((prev) => ({ ...prev, weight: Number(e.target.value) }))}
+                                  onChange={handleNumberChange('weight')}
                                   placeholder="몸무게"
-                                  className="text-sm"
+                                  className="text-sm [&::-webkit-inner-spin-button]:appearance-none"
                                 />
                               </div>
                               <div className="md:col-span-2">
