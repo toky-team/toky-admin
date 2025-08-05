@@ -5,6 +5,7 @@ import { Loading } from '~/features/loading/components/loading';
 import HomePage from '~/pages/home/home.page';
 import LoginPage from '~/pages/login/login.page';
 import LoginCallbackPage from '~/pages/login/login-callback.page';
+import MatchRecordPage from '~/pages/match-record/match-record.page';
 import PlayerPage from '~/pages/player/player.page';
 import QuestionPage from '~/pages/question/question.page';
 import ScorePage from '~/pages/score/score.page';
@@ -32,6 +33,7 @@ export default function App() {
               <Route path="/score" element={<ScorePage />} />
               <Route path="/question" element={<QuestionPage />} />
               <Route path="/player" element={<PlayerPage />} />
+              <Route path="/match-record" element={<MatchRecordPage />} />
             </Route>
           </Route>
 

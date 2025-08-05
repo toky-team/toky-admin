@@ -69,6 +69,11 @@ export function usePlayer() {
     }
   };
 
+  // 초기 데이터 로드
+  useEffect(() => {
+    fetchAll();
+  }, []);
+
   const fetchPlayers = async (sport?: Sport, university?: University) => {
     try {
       const response = await getPlayers(sport, university);
@@ -192,16 +197,6 @@ export function usePlayer() {
       throw err;
     }
   };
-
-  // 초기 데이터 로드 및 주기적 업데이트
-  useEffect(() => {
-    fetchAll();
-    const interval = setInterval(() => {
-      fetchAll();
-    }, 30000); // 30초마다 갱신
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return {
     players,

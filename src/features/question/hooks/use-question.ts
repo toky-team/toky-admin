@@ -34,10 +34,6 @@ export function useQuestion() {
 
   useEffect(() => {
     fetchAll();
-    const interval = setInterval(() => {
-      fetchAll();
-    }, 30000);
-    return () => clearInterval(interval);
   }, []);
 
   const handleUpdate = async (questionId: string, question: string, options: string[]) => {

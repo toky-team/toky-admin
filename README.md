@@ -114,3 +114,9 @@ React, Vite, Zustand, Axios, Tailwind
 
 - 베팅 질문
   - 질문 및 답변 수정
+
+- 선수
+  - 선수 목록 관리
+
+- 경기 전적
+  - 종목 별 전적 데이터 관리
