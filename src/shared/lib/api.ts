@@ -32,7 +32,7 @@ api.interceptors.response.use(
           }
         );
 
-        if (refreshResponse.status === 200 && err.config) {
+        if (refreshResponse.status >= 200 && refreshResponse.status < 300 && err.config) {
           return api(err.config); // 요청 재시도
         }
       } catch {
