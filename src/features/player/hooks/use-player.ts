@@ -126,6 +126,7 @@ export function usePlayer() {
     weight: number;
     position: string;
     backNumber: number;
+    careers: string[];
     image: File;
   }) => {
     try {
@@ -161,6 +162,7 @@ export function usePlayer() {
       weight?: number;
       position?: string;
       backNumber?: number;
+      careers?: string[];
       image?: File;
     }
   ) => {

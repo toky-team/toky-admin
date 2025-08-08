@@ -12,5 +12,6 @@ export interface Player {
   weight: number;
   position: string;
   backNumber: number;
+  careers: string[];
   imageUrl: string;
 }

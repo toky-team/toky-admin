@@ -31,6 +31,7 @@ export function PlayerManager() {
     weight: string;
     position: string;
     backNumber: string;
+    careers: string[];
     image: File | null;
   }>({
     name: '',
@@ -42,6 +43,7 @@ export function PlayerManager() {
     weight: '',
     position: '',
     backNumber: '',
+    careers: [],
     image: null as File | null,
   });
 
@@ -91,6 +93,7 @@ export function PlayerManager() {
       weight: '',
       position: '',
       backNumber: '',
+      careers: [],
       image: null,
     });
   };
@@ -107,6 +110,7 @@ export function PlayerManager() {
       weight: player.weight.toString(),
       position: player.position,
       backNumber: player.backNumber.toString(),
+      careers: [...player.careers],
       image: null,
     });
   };
@@ -124,6 +128,7 @@ export function PlayerManager() {
       weight: '',
       position: '',
       backNumber: '',
+      careers: [],
       image: null,
     });
   };
@@ -158,6 +163,7 @@ export function PlayerManager() {
         weight,
         position: formData.position,
         backNumber,
+        careers: formData.careers,
         image: formData.image,
       });
     } else if (editingPlayerId) {
@@ -171,6 +177,7 @@ export function PlayerManager() {
         weight,
         position: formData.position,
         backNumber,
+        careers: formData.careers,
         image: formData.image ?? undefined,
       });
     }
@@ -188,6 +195,24 @@ export function PlayerManager() {
     if (file) {
       setFormData((prev) => ({ ...prev, image: file }));
     }
+  };
+
+  const addCareer = () => {
+    setFormData((prev) => ({ ...prev, careers: [...prev.careers, ''] }));
+  };
+
+  const removeCareer = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      careers: prev.careers.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateCareer = (index: number, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      careers: prev.careers.map((career, i) => (i === index ? value : career)),
+    }));
   };
 
   return (
@@ -336,6 +361,32 @@ export function PlayerManager() {
                 <Label htmlFor="image">선수 이미지 *</Label>
                 <Input id="image" type="file" accept="image/*" onChange={handleImageChange} />
               </div>
+              <div className="md:col-span-2">
+                <div className="flex justify-between items-center mb-2">
+                  <Label>주요 경력</Label>
+                  <Button type="button" onClick={addCareer} variant="secondary" size="sm">
+                    ➕ 경력 추가
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {formData.careers.map((career, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={career}
+                        onChange={(e) => updateCareer(index, e.target.value)}
+                        placeholder="경력사항을 입력하세요"
+                        className="flex-1"
+                      />
+                      <Button type="button" onClick={() => removeCareer(index)} variant="destructive" size="sm">
+                        🗑️
+                      </Button>
+                    </div>
+                  ))}
+                  {formData.careers.length === 0 && (
+                    <p className="text-muted-foreground text-sm">등록된 경력이 없습니다.</p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </Card>
@@ -460,6 +511,37 @@ export function PlayerManager() {
                                   className="text-sm w-full"
                                 />
                               </div>
+                              <div className="md:col-span-2">
+                                <div className="flex justify-between items-center mb-2">
+                                  <Label>주요 경력</Label>
+                                  <Button type="button" onClick={addCareer} variant="secondary" size="sm">
+                                    ➕ 경력 추가
+                                  </Button>
+                                </div>
+                                <div className="space-y-2">
+                                  {formData.careers.map((career, index) => (
+                                    <div key={index} className="flex gap-2">
+                                      <Input
+                                        value={career}
+                                        onChange={(e) => updateCareer(index, e.target.value)}
+                                        placeholder="경력사항을 입력하세요"
+                                        className="flex-1 text-sm"
+                                      />
+                                      <Button
+                                        type="button"
+                                        onClick={() => removeCareer(index)}
+                                        variant="destructive"
+                                        size="sm"
+                                      >
+                                        🗑️
+                                      </Button>
+                                    </div>
+                                  ))}
+                                  {formData.careers.length === 0 && (
+                                    <p className="text-muted-foreground text-sm">등록된 경력이 없습니다.</p>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </div>
                         ) : (
@@ -503,6 +585,18 @@ export function PlayerManager() {
                                       <span className="font-medium">⚖️ 체중:</span>
                                       <span>{player.weight}kg</span>
                                     </div>
+                                    {player.careers.length > 0 && (
+                                      <div className="flex items-start gap-2">
+                                        <span className="font-medium">🏆 주요 경력:</span>
+                                        <div className="flex-1">
+                                          {player.careers.map((career, index) => (
+                                            <div key={index} className="text-sm mb-1">
+                                              • {career}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
 
                                   {player.imageUrl && (

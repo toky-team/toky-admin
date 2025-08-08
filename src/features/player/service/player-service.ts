@@ -23,9 +23,10 @@ export const createPlayer = async (params: {
   weight: number;
   position: string;
   backNumber: number;
+  careers: string[];
   image: File;
 }) => {
-  const { name, university, sport, department, birth, height, weight, position, backNumber, image } = params;
+  const { name, university, sport, department, birth, height, weight, position, backNumber, careers, image } = params;
 
   const formData = new FormData();
   formData.append('name', name);
@@ -37,6 +38,7 @@ export const createPlayer = async (params: {
   formData.append('weight', weight.toString());
   formData.append('position', position);
   formData.append('backNumber', backNumber.toString());
+  formData.append('careers', JSON.stringify(careers));
   formData.append('image', image);
 
   return await api.post<Player>('/admin/player', formData, {
@@ -58,10 +60,11 @@ export const updatePlayer = async (
     weight?: number;
     position?: string;
     backNumber?: number;
+    careers?: string[];
     image?: File;
   }
 ) => {
-  const { name, university, sport, department, birth, height, weight, position, backNumber, image } = parmas;
+  const { name, university, sport, department, birth, height, weight, position, backNumber, careers, image } = parmas;
 
   const formData = new FormData();
   if (name !== undefined && name.trim() !== '') {
@@ -90,6 +93,9 @@ export const updatePlayer = async (
   }
   if (backNumber !== undefined) {
     formData.append('backNumber', backNumber.toString());
+  }
+  if (careers !== undefined) {
+    formData.append('careers', JSON.stringify(careers));
   }
   if (image) {
     formData.append('image', image);
