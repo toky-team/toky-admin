@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
 import { useQuestion } from '~/features/question/hooks/use-question';
-import type { Question } from '~/features/question/types/question';
 import { emojiMap, Sport } from '~/shared/types/sport';
 import { Button } from '~/shared/ui/button';
 import { Card } from '~/shared/ui/card';
@@ -14,55 +13,39 @@ export function QuestionManager() {
   const [selectedSport, setSelectedSport] = useState<Sport>(Sport.FOOTBALL);
   const { questions, error, handleUpdate } = useQuestion();
 
-  const selectedQuestions = questions[selectedSport];
+  const selectedQuestion = questions[selectedSport];
 
-  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<string>('');
-  const [editingOptions, setEditingOptions] = useState<string[]>([]);
+  const [editingPositionFilter, setEditingPositionFilter] = useState<string>('');
 
-  const handleEditStart = (question: Question) => {
-    setEditingQuestionId(question.id);
-    setEditingQuestion(question.question);
-    setEditingOptions([...question.options]);
+  const handleEditStart = () => {
+    if (selectedQuestion) {
+      setEditingQuestion(selectedQuestion.question);
+      setEditingPositionFilter(selectedQuestion.positionFilter || '');
+    } else {
+      setEditingQuestion('');
+      setEditingPositionFilter('');
+    }
+    setIsEditing(true);
   };
 
   const handleEditCancel = () => {
-    setEditingQuestionId(null);
+    setIsEditing(false);
     setEditingQuestion('');
-    setEditingOptions([]);
+    setEditingPositionFilter('');
   };
 
   const handleEditSave = async () => {
-    if (!editingQuestionId) return;
-
-    const filteredOptions = editingOptions.filter((option) => option.trim() !== '');
-
-    if (editingQuestion.trim() === '' || filteredOptions.length < 2 || filteredOptions.length > 3) {
-      alert('질문과 최소 2-3개의 선택지를 입력해주세요.');
+    if (editingQuestion.trim() === '') {
+      alert('질문을 입력해주세요.');
       return;
     }
 
-    await handleUpdate(editingQuestionId, editingQuestion, filteredOptions);
+    const positionFilter = editingPositionFilter.trim() === '' ? null : editingPositionFilter.trim();
+
+    await handleUpdate(selectedSport, editingQuestion, positionFilter);
     handleEditCancel();
-  };
-
-  const handleOptionChange = (index: number, value: string) => {
-    const newOptions = [...editingOptions];
-    newOptions[index] = value;
-    setEditingOptions(newOptions);
-  };
-
-  const handleAddOption = () => {
-    if (editingOptions.length < 3) {
-      setEditingOptions([...editingOptions, '']);
-    }
-  };
-
-  const handleRemoveOption = (index: number) => {
-    if (editingOptions.length > 2) {
-      const newOptions = editingOptions.filter((_, i) => i !== index);
-      setEditingOptions(newOptions);
-    }
   };
 
   return (
@@ -92,7 +75,9 @@ export function QuestionManager() {
         <h2 className="text-xl font-bold">
           {emojiMap[selectedSport]} {selectedSport} 베팅 문항 관리
         </h2>
-        <span className="text-sm text-muted-foreground">총 {selectedQuestions?.length || 0}개 문항</span>
+        <Button onClick={handleEditStart} disabled={isEditing}>
+          {selectedQuestion ? '✏️ 수정' : '➕ 질문 추가'}
+        </Button>
       </div>
 
       {/* 에러 메시지 */}
@@ -102,116 +87,85 @@ export function QuestionManager() {
         </Card>
       )}
 
-      {/* 질문 목록 */}
-      {!selectedQuestions || selectedQuestions.length === 0 ? (
-        <Card className="p-6 text-center">
-          <p className="text-muted-foreground">질문이 없습니다.</p>
+      {/* 질문 관리 */}
+      {isEditing ? (
+        /* 편집 모드 */
+        <Card className="p-8">
+          <div className="space-y-6 max-w-4xl mx-auto">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">{selectedQuestion ? '질문 수정' : '새 질문 추가'}</h3>
+              <div className="flex gap-2">
+                <Button onClick={() => void handleEditSave()}>💾 저장</Button>
+                <Button onClick={handleEditCancel} variant="secondary">
+                  ❌ 취소
+                </Button>
+              </div>
+            </div>
+
+            {/* 질문 입력 */}
+            <div>
+              <Label htmlFor="question">질문 *</Label>
+              <textarea
+                id="question"
+                value={editingQuestion}
+                onChange={(e) => setEditingQuestion(e.target.value)}
+                placeholder="베팅 질문을 입력하세요"
+                className="mt-2 w-full px-3 py-3 border border-input rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base"
+                rows={3}
+              />
+            </div>
+
+            {/* 포지션 필터 입력 */}
+            <div>
+              <Label htmlFor="positionFilter">포지션 필터</Label>
+              <Input
+                id="positionFilter"
+                value={editingPositionFilter}
+                onChange={(e) => setEditingPositionFilter(e.target.value)}
+                placeholder="특정 포지션만 대상으로 할 경우 입력 (예: 공격수, 수비수 등)"
+                className="mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-2">비워두면 모든 선수를 대상으로 합니다.</p>
+            </div>
+          </div>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {selectedQuestions
-            .sort((a, b) => a.order - b.order)
-            .map((question) => (
-              <Card key={question.id} className="p-6">
-                {editingQuestionId === question.id ? (
-                  /* 편집 모드 */
-                  <div className="space-y-4">
-                    {/* 편집 헤더 */}
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-lg font-semibold">질문 {question.order} 편집</h3>
-                      <div className="flex gap-2">
-                        <Button onClick={() => void handleEditSave()}>💾 저장</Button>
-                        <Button onClick={handleEditCancel} variant="secondary">
-                          ❌ 취소
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* 질문 입력 */}
-                    <div>
-                      <Label htmlFor={`question-${question.id}`}>질문</Label>
-                      <Input
-                        id={`question-${question.id}`}
-                        value={editingQuestion}
-                        onChange={(e) => setEditingQuestion(e.target.value)}
-                        placeholder="질문을 입력하세요"
-                        className="mt-1"
-                      />
-                    </div>
-
-                    {/* 선택지 입력 */}
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <Label>선택지</Label>
-                        <Button onClick={handleAddOption} variant="secondary" disabled={editingOptions.length >= 3}>
-                          ➕ 선택지 추가
-                        </Button>
-                      </div>
-
-                      <div className="space-y-2">
-                        {editingOptions.map((option, index) => (
-                          <div key={index} className="flex gap-2">
-                            <Input
-                              value={option}
-                              onChange={(e) => handleOptionChange(index, e.target.value)}
-                              placeholder={`선택지 ${index + 1}`}
-                              className="flex-1"
-                            />
-                            <Button
-                              onClick={() => handleRemoveOption(index)}
-                              variant="destructive"
-                              disabled={editingOptions.length <= 2}
-                            >
-                              🗑️
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+        /* 보기 모드 */
+        <>
+          {!selectedQuestion ? (
+            <Card className="p-6 text-center">
+              <p className="text-muted-foreground">등록된 질문이 없습니다.</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                상단의 &quot;질문 추가&quot; 버튼을 클릭하여 질문을 등록하세요.
+              </p>
+            </Card>
+          ) : (
+            <Card className="p-6">
+              <div className="space-y-4">
+                {/* 질문 내용 */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-sm font-medium text-primary bg-primary/10 px-2 py-1 rounded">베팅 질문</span>
+                    {selectedQuestion.positionFilter && (
+                      <span className="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded">
+                        📍 {selectedQuestion.positionFilter}
+                      </span>
+                    )}
                   </div>
-                ) : (
-                  /* 보기 모드 */
-                  <div>
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
-                        {/* 질문 헤더 */}
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-sm font-medium text-primary bg-primary/10 px-2 py-1 rounded">
-                            질문 {question.order}
-                          </span>
-                          <span className="text-xs text-muted-foreground">{question.options.length}개 선택지</span>
-                        </div>
+                  <h3 className="text-lg font-semibold">{selectedQuestion.question}</h3>
+                </div>
 
-                        {/* 질문 내용 */}
-                        <h3 className="text-lg font-semibold mb-3">{question.question}</h3>
-
-                        {/* 선택지 목록 */}
-                        <div className="space-y-1">
-                          {question.options.map((option, index) => (
-                            <div key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <span className="w-6 h-6 rounded-full bg-gray-500 flex items-center justify-center text-xs font-medium">
-                                {index + 1}
-                              </span>
-                              {option}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* 수정 버튼 */}
-                      <Button
-                        onClick={() => handleEditStart(question)}
-                        variant="secondary"
-                        disabled={editingQuestionId !== null}
-                      >
-                        ✏️ 수정
-                      </Button>
-                    </div>
+                {/* 필터 정보 */}
+                <div className="pt-2 border-t border-gray-100">
+                  <div className="text-sm text-muted-foreground">
+                    <strong>대상 선수:</strong>{' '}
+                    {selectedQuestion.positionFilter ? `${selectedQuestion.positionFilter} 포지션` : '모든 선수'}
                   </div>
-                )}
-              </Card>
-            ))}
-        </div>
+                </div>
+              </div>
+            </Card>
+          )}
+        </>
       )}
     </div>
   );

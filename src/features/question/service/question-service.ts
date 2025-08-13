@@ -3,15 +3,19 @@ import api from '~/shared/lib/api';
 import type { Sport } from '~/shared/types/sport';
 
 export const getQuestion = async (sport: Sport) => {
-  return await api.get<Question[]>('/bet-question', {
+  return await api.get<Question>('/bet-question', {
     params: { sport },
   });
 };
 
-export const updateQuestion = async (questionId: string, question: string, options: string[]) => {
+export const getAllQuestions = async () => {
+  return await api.get<Question[]>('/bet-question/all');
+};
+
+export const updateQuestion = async (sport: Sport, question: string, positionFilter: string | null) => {
   return await api.patch<Question>('/admin/bet-question', {
-    questionId,
+    sport,
     question,
-    options,
+    positionFilter,
   });
 };

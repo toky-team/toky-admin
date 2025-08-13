@@ -5,12 +5,12 @@ import type { Question } from '~/features/question/types/question';
 import { Sport } from '~/shared/types/sport';
 
 export function useQuestion() {
-  const [questions, setQuestions] = useState<Record<Sport, Question[]>>({
-    [Sport.FOOTBALL]: [],
-    [Sport.BASKETBALL]: [],
-    [Sport.BASEBALL]: [],
-    [Sport.RUGBY]: [],
-    [Sport.ICE_HOCKEY]: [],
+  const [questions, setQuestions] = useState<Record<Sport, Question | null>>({
+    [Sport.FOOTBALL]: null,
+    [Sport.BASKETBALL]: null,
+    [Sport.BASEBALL]: null,
+    [Sport.RUGBY]: null,
+    [Sport.ICE_HOCKEY]: null,
   });
   const [error, setError] = useState<Error | null>(null);
 
@@ -18,7 +18,7 @@ export function useQuestion() {
     try {
       const responses = await Promise.all(Object.values(Sport).map((sport) => getQuestion(sport)));
 
-      const newQuestions: Record<Sport, Question[]> = {
+      const newQuestions: Record<Sport, Question | null> = {
         [Sport.FOOTBALL]: responses[0].data,
         [Sport.BASKETBALL]: responses[1].data,
         [Sport.BASEBALL]: responses[2].data,
@@ -36,14 +36,13 @@ export function useQuestion() {
     fetchAll();
   }, []);
 
-  const handleUpdate = async (questionId: string, question: string, options: string[]) => {
+  const handleUpdate = async (sport: Sport, question: string, positionFilter: string | null) => {
     try {
-      const response = await updateQuestion(questionId, question, options);
+      const response = await updateQuestion(sport, question, positionFilter);
       setQuestions((prev) => {
-        const sport = response.data.sport;
         return {
           ...prev,
-          [sport]: prev[sport].map((q) => (q.id === questionId ? response.data : q)),
+          [sport]: response.data,
         };
       });
       setError(null);
