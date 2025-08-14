@@ -4,14 +4,22 @@ import api from '~/shared/lib/api';
 import type { Sport } from '~/shared/types/sport';
 
 export const getMatchRecords = async (sport: Sport) => {
-  return await api.get<MatchRecord[]>(`/match-record/${sport}`);
+  return await api.get<MatchRecord[]>('/match-record', {
+    params: { sport },
+  });
 };
 
 export const putMatchRecords = async (sport: Sport, matchRecords: MatchRecord[]) => {
   const recordsParams = matchRecords.map(recordToParams);
-  return await api.put<MatchRecord[]>(`/admin/match-record/${sport}`, {
-    records: recordsParams,
-  });
+  return await api.put<MatchRecord[]>(
+    '/admin/match-record',
+    {
+      records: recordsParams,
+    },
+    {
+      params: { sport },
+    }
+  );
 };
 
 const recordToParams = (record: MatchRecord): MatchRecordParams => {
