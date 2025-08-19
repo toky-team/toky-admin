@@ -8,6 +8,7 @@ const navItems = [
   { label: '선수 관리', to: '/player' },
   { label: '경기 기록 관리', to: '/match-record' },
   { label: '좋아요 관리', to: '/like' },
+  { label: '라이브 URL 관리', to: '/live-url' },
 ];
 
 interface SidebarProps {

@@ -123,3 +123,6 @@ React, Vite, Zustand, Axios, Tailwind
 
 - 응원 관리
   - 종목 별 실시간 응원 데이터 관리
+
+- 라이브 URL 관리
+  - 종목 별 라이브 중계 iframe URL 관리

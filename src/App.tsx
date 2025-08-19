@@ -4,6 +4,7 @@ import { useAuthInit } from '~/features/auth/hooks/use-auth-init';
 import { Loading } from '~/features/loading/components/loading';
 import HomePage from '~/pages/home/home.page';
 import LikePage from '~/pages/like/like.page';
+import LiveUrlPage from '~/pages/live-url/live-url.page';
 import LoginPage from '~/pages/login/login.page';
 import LoginCallbackPage from '~/pages/login/login-callback.page';
 import MatchRecordPage from '~/pages/match-record/match-record.page';
@@ -36,6 +37,7 @@ export default function App() {
               <Route path="/player" element={<PlayerPage />} />
               <Route path="/match-record" element={<MatchRecordPage />} />
               <Route path="/like" element={<LikePage />} />
+              <Route path="/live-url" element={<LiveUrlPage />} />
             </Route>
           </Route>
 
