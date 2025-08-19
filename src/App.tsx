@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { useAuthInit } from '~/features/auth/hooks/use-auth-init';
 import { Loading } from '~/features/loading/components/loading';
+import CheerPage from '~/pages/cheer/cheer.page';
 import HomePage from '~/pages/home/home.page';
 import LoginPage from '~/pages/login/login.page';
 import LoginCallbackPage from '~/pages/login/login-callback.page';
@@ -34,6 +35,7 @@ export default function App() {
               <Route path="/question" element={<QuestionPage />} />
               <Route path="/player" element={<PlayerPage />} />
               <Route path="/match-record" element={<MatchRecordPage />} />
+              <Route path="/cheer" element={<CheerPage />} />
             </Route>
           </Route>
 

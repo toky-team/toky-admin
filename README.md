@@ -120,3 +120,6 @@ React, Vite, Zustand, Axios, Tailwind
 
 - 경기 전적
   - 종목 별 전적 데이터 관리
+
+- 응원 관리
+  - 종목 별 실시간 응원 데이터 관리
