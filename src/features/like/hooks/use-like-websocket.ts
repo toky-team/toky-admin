@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 
-import type { Cheer } from '~/features/cheer/types/cheer';
+import type { Like } from '~/features/like/types/like';
 import webSocketManager from '~/shared/lib/websocket';
 import { Sport } from '~/shared/types/sport';
 import { University } from '~/shared/types/university';
 
-interface CheerUpdateEvent {
-  cheer: {
+interface LikeUpdateEvent {
+  like: {
     sport: Sport;
     KULike: number;
     YULike: number;
@@ -26,10 +26,10 @@ interface ErrorEvent {
   };
 }
 
-export function useCheerWebSocket() {
+export function useLikeWebSocket() {
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [cheers, setCheers] = useState<Record<Sport, Cheer | null>>({
+  const [likes, setLikes] = useState<Record<Sport, Like | null>>({
     [Sport.FOOTBALL]: null,
     [Sport.BASKETBALL]: null,
     [Sport.BASEBALL]: null,
@@ -38,14 +38,14 @@ export function useCheerWebSocket() {
   });
 
   useEffect(() => {
-    // 중앙 관리 시스템을 통해 cheer 네임스페이스 연결
-    const socket = webSocketManager.connect({ namespace: 'cheer' });
+    // 중앙 관리 시스템을 통해 like 네임스페이스 연결
+    const socket = webSocketManager.connect({ namespace: 'like' });
 
     const handleConnect = () => {
       setIsConnected(true);
       setError(null);
 
-      // 모든 종목의 응원 데이터를 구독
+      // 모든 종목의 좋아요 데이터를 구독
       Object.values(Sport).forEach((sport) => {
         socket.emit('join_room', { sport });
       });
@@ -73,14 +73,14 @@ export function useCheerWebSocket() {
       }
     };
 
-    const handleCheerUpdate = (data: CheerUpdateEvent) => {
-      const { cheer } = data;
-      setCheers((prev) => ({
+    const handleLikeUpdate = (data: LikeUpdateEvent) => {
+      const { like } = data;
+      setLikes((prev) => ({
         ...prev,
-        [cheer.sport]: {
-          sport: cheer.sport,
-          KULike: cheer.KULike,
-          YULike: cheer.YULike,
+        [like.sport]: {
+          sport: like.sport,
+          KULike: like.KULike,
+          YULike: like.YULike,
         },
       }));
     };
@@ -93,7 +93,7 @@ export function useCheerWebSocket() {
     socket.on('connect', handleConnect);
     socket.on('disconnect', handleDisconnect);
     socket.on('connect_error', handleConnectError);
-    socket.on('cheer_update', handleCheerUpdate);
+    socket.on('like_update', handleLikeUpdate);
     socket.on('error', handleError);
 
     // 초기 연결 상태 확인
@@ -114,25 +114,25 @@ export function useCheerWebSocket() {
       socket.off('connect', handleConnect);
       socket.off('disconnect', handleDisconnect);
       socket.off('connect_error', handleConnectError);
-      socket.off('cheer_update', handleCheerUpdate);
+      socket.off('like_update', handleLikeUpdate);
       socket.off('error', handleError);
 
       // 연결 해제는 하지 않음 - 다른 컴포넌트에서도 사용할 수 있도록
-      // webSocketManager.disconnect('cheer');
+      // webSocketManager.disconnect('like');
     };
   }, []);
 
-  const addCheer = (sport: Sport, university: University, likes: number = 1) => {
-    const socket = webSocketManager.getSocket('cheer');
+  const addLike = (sport: Sport, university: University, likes: number = 1) => {
+    const socket = webSocketManager.getSocket('like');
     if (socket && isConnected) {
-      socket.emit('add_cheer', { sport, university, likes });
+      socket.emit('add_like', { sport, university, likes });
     }
   };
 
   return {
-    cheers,
+    likes,
     isConnected,
     error,
-    addCheer,
+    addLike,
   };
 }

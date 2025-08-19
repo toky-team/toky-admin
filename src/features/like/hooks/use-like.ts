@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 
-import { getCheer, resetCheer } from '~/features/cheer/service/cheer-service';
-import type { Cheer } from '~/features/cheer/types/cheer';
+import { getLike, resetLike } from '~/features/like/service/like-service';
+import type { Like } from '~/features/like/types/like';
 import { Sport } from '~/shared/types/sport';
 
-export function useCheer() {
-  const [cheers, setCheers] = useState<Record<Sport, Cheer | null>>({
+export function useLike() {
+  const [likes, setLikes] = useState<Record<Sport, Like | null>>({
     [Sport.FOOTBALL]: null,
     [Sport.BASKETBALL]: null,
     [Sport.BASEBALL]: null,
@@ -16,9 +16,9 @@ export function useCheer() {
 
   const fetchAll = async () => {
     try {
-      const responses = await Promise.all(Object.values(Sport).map((sport) => getCheer(sport)));
+      const responses = await Promise.all(Object.values(Sport).map((sport) => getLike(sport)));
 
-      const newCheers: Record<Sport, Cheer | null> = {
+      const newLikes: Record<Sport, Like | null> = {
         [Sport.FOOTBALL]: responses[0]?.data || null,
         [Sport.BASKETBALL]: responses[1]?.data || null,
         [Sport.BASEBALL]: responses[2]?.data || null,
@@ -26,7 +26,7 @@ export function useCheer() {
         [Sport.ICE_HOCKEY]: responses[4]?.data || null,
       };
 
-      setCheers(newCheers);
+      setLikes(newLikes);
       setError(null);
     } catch (err) {
       setError(err as Error);
@@ -43,8 +43,8 @@ export function useCheer() {
 
   const handleReset = async (sport: Sport) => {
     try {
-      const response = await resetCheer(sport);
-      setCheers((prev) => ({
+      const response = await resetLike(sport);
+      setLikes((prev) => ({
         ...prev,
         [sport]: response.data,
       }));
@@ -55,7 +55,7 @@ export function useCheer() {
   };
 
   return {
-    cheers,
+    likes,
     error,
     refetch: fetchAll,
     handleReset,

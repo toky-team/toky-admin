@@ -1,6 +1,6 @@
 import type { Sport } from '~/shared/types/sport';
 
-export interface Cheer {
+export interface Like {
   sport: Sport;
   KULike: number;
   YULike: number;

@@ -1,5 +1,5 @@
-import { useCheer } from '~/features/cheer/hooks/use-cheer';
-import { useCheerWebSocket } from '~/features/cheer/hooks/use-cheer-websocket';
+import { useLike } from '~/features/like/hooks/use-like';
+import { useLikeWebSocket } from '~/features/like/hooks/use-like-websocket';
 import { emojiMap, Sport } from '~/shared/types/sport';
 import { University } from '~/shared/types/university';
 import { Button } from '~/shared/ui/button';
@@ -15,23 +15,23 @@ const sportNames: Record<Sport, string> = {
   [Sport.ICE_HOCKEY]: '아이스하키',
 };
 
-export function CheerManager() {
-  const { cheers: apiCheers, error: apiError, handleReset } = useCheer();
-  const { cheers: wsCheers, isConnected, error: wsError, addCheer } = useCheerWebSocket();
+export function LikeManager() {
+  const { likes: apiLikes, error: apiError, handleReset } = useLike();
+  const { likes: wsLikes, isConnected, error: wsError, addLike } = useLikeWebSocket();
 
   // WebSocket 데이터가 있으면 우선 사용, 없으면 API 데이터 사용
-  const getCheersData = (sport: Sport) => {
-    return wsCheers[sport] || apiCheers[sport];
+  const getLikesData = (sport: Sport) => {
+    return wsLikes[sport] || apiLikes[sport];
   };
 
-  const handleAddCheer = (sport: Sport, university: University) => {
+  const handleAddLike = (sport: Sport, university: University) => {
     if (!isConnected) {
       return;
     }
-    addCheer(sport, university, 1);
+    addLike(sport, university, 1);
   };
 
-  const handleResetCheer = async (sport: Sport) => {
+  const handleResetLike = async (sport: Sport) => {
     await handleReset(sport);
   };
 
@@ -65,12 +65,12 @@ export function CheerManager() {
         </div>
       )}
 
-      {/* 응원 데이터 그리드 */}
+      {/* 좋아요 데이터 그리드 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sports.map((sport) => {
-          const cheerData = getCheersData(sport);
-          const kuLikes = cheerData?.KULike || 0;
-          const yuLikes = cheerData?.YULike || 0;
+          const likeData = getLikesData(sport);
+          const kuLikes = likeData?.KULike || 0;
+          const yuLikes = likeData?.YULike || 0;
           const total = kuLikes + yuLikes;
 
           return (
@@ -85,7 +85,7 @@ export function CheerManager() {
                   <div className="text-sm text-gray-500">총 {total.toLocaleString()}개</div>
                 </div>
 
-                {/* 응원 현황 */}
+                {/* 좋아요 현황 */}
                 <div className="space-y-3">
                   {/* 고려대학교 */}
                   <div className="space-y-2">
@@ -120,11 +120,11 @@ export function CheerManager() {
                   </div>
                 </div>
 
-                {/* 응원 버튼들 */}
+                {/* 좋아요 버튼들 */}
                 <div className="space-y-2">
                   <div className="flex gap-2">
                     <Button
-                      onClick={() => handleAddCheer(sport, University.KOREA_UNIVERSITY)}
+                      onClick={() => handleAddLike(sport, University.KOREA_UNIVERSITY)}
                       className={`flex-1 text-white transition-all duration-200 ${
                         isConnected
                           ? 'bg-red-500 hover:bg-red-600 shadow-md hover:shadow-lg'
@@ -132,10 +132,10 @@ export function CheerManager() {
                       }`}
                       disabled={!isConnected}
                     >
-                      {isConnected ? '고려대 응원 +1' : '고려대 응원 (연결중...)'}
+                      {isConnected ? '고려대 좋아요 +1' : '고려대 좋아요 (연결중...)'}
                     </Button>
                     <Button
-                      onClick={() => handleAddCheer(sport, University.YONSEI_UNIVERSITY)}
+                      onClick={() => handleAddLike(sport, University.YONSEI_UNIVERSITY)}
                       className={`flex-1 text-white transition-all duration-200 ${
                         isConnected
                           ? 'bg-blue-500 hover:bg-blue-600 shadow-md hover:shadow-lg'
@@ -143,18 +143,18 @@ export function CheerManager() {
                       }`}
                       disabled={!isConnected}
                     >
-                      {isConnected ? '연세대 응원 +1' : '연세대 응원 (연결중...)'}
+                      {isConnected ? '연세대 좋아요 +1' : '연세대 좋아요 (연결중...)'}
                     </Button>
                   </div>
 
                   <Button
                     onClick={() => {
-                      void handleResetCheer(sport);
+                      void handleResetLike(sport);
                     }}
                     variant="outline"
                     className="w-full text-gray-600 hover:text-gray-800 hover:bg-gray-50"
                   >
-                    응원 초기화
+                    좋아요 초기화
                   </Button>
                 </div>
               </div>
