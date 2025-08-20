@@ -14,4 +14,5 @@ export interface Player {
   backNumber: number;
   careers: string[];
   imageUrl: string;
+  likeCount: number;
 }

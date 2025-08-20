@@ -585,6 +585,10 @@ export function PlayerManager() {
                                       <span className="font-medium">⚖️ 체중:</span>
                                       <span>{player.weight}kg</span>
                                     </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium">❤️ 좋아요:</span>
+                                      <span className="font-medium">{player.likeCount}개</span>
+                                    </div>
                                     {player.careers.length > 0 && (
                                       <div className="flex items-start gap-2">
                                         <span className="font-medium">🏆 주요 경력:</span>
