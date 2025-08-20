@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { useAuthInit } from '~/features/auth/hooks/use-auth-init';
 import { Loading } from '~/features/loading/components/loading';
+import GiftPage from '~/pages/gift/gift.page';
 import HomePage from '~/pages/home/home.page';
 import LikePage from '~/pages/like/like.page';
 import LiveUrlPage from '~/pages/live-url/live-url.page';
@@ -38,6 +39,7 @@ export default function App() {
               <Route path="/match-record" element={<MatchRecordPage />} />
               <Route path="/like" element={<LikePage />} />
               <Route path="/live-url" element={<LiveUrlPage />} />
+              <Route path="/gift" element={<GiftPage />} />
             </Route>
           </Route>
 

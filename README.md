@@ -126,3 +126,6 @@ React, Vite, Zustand, Axios, Tailwind
 
 - 라이브 URL 관리
   - 종목 별 라이브 중계 iframe URL 관리
+
+- 경품 관리
+  - 경품 목록 및 별칭, 필요 응모권 수 등 관리
