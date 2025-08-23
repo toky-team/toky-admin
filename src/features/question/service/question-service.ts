@@ -1,5 +1,6 @@
 import type { Question } from '~/features/question/types/question';
 import api from '~/shared/lib/api';
+import type { MatchResult } from '~/shared/types/match-result';
 import type { Sport } from '~/shared/types/sport';
 
 export const getQuestion = async (sport: Sport) => {
@@ -17,5 +18,29 @@ export const updateQuestion = async (sport: Sport, question: string, positionFil
     sport,
     question,
     positionFilter,
+  });
+};
+
+export const setAnswer = async (
+  sport: Sport,
+  answer: {
+    predict: {
+      matchResult: MatchResult;
+      score: {
+        kuScore: number;
+        yuScore: number;
+      };
+    };
+    kuPlayer: {
+      playerId: string | null;
+    };
+    yuPlayer: {
+      playerId: string | null;
+    };
+  } | null
+) => {
+  return await api.patch<Question>('/admin/bet-question/answer', {
+    sport,
+    answer,
   });
 };

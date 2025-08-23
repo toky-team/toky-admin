@@ -1,7 +1,10 @@
 import { useState } from 'react';
 
+import { usePlayer } from '~/features/player/hooks/use-player';
 import { useQuestion } from '~/features/question/hooks/use-question';
+import { MatchResult } from '~/shared/types/match-result';
 import { emojiMap, Sport } from '~/shared/types/sport';
+import { University } from '~/shared/types/university';
 import { Button } from '~/shared/ui/button';
 import { Card } from '~/shared/ui/card';
 import { Input } from '~/shared/ui/input';
@@ -11,13 +14,30 @@ const sports = Object.values(Sport);
 
 export function QuestionManager() {
   const [selectedSport, setSelectedSport] = useState<Sport>(Sport.FOOTBALL);
-  const { questions, error, handleUpdate } = useQuestion();
+  const { questions, error, handleUpdate, handleSetAnswer } = useQuestion();
+  const { players } = usePlayer();
 
   const selectedQuestion = questions[selectedSport];
 
   const [isEditing, setIsEditing] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<string>('');
   const [editingPositionFilter, setEditingPositionFilter] = useState<string>('');
+
+  // 정답 관련 상태
+  const [isEditingAnswer, setIsEditingAnswer] = useState(false);
+  const [answerForm, setAnswerForm] = useState<{
+    matchResult: MatchResult;
+    kuScore: string;
+    yuScore: string;
+    kuPlayer: string;
+    yuPlayer: string;
+  }>({
+    matchResult: MatchResult.KOREA_UNIVERSITY,
+    kuScore: '0',
+    yuScore: '0',
+    kuPlayer: '',
+    yuPlayer: '',
+  });
 
   const handleEditStart = () => {
     if (selectedQuestion) {
@@ -46,6 +66,130 @@ export function QuestionManager() {
 
     await handleUpdate(selectedSport, editingQuestion, positionFilter);
     handleEditCancel();
+  };
+
+  // 정답 관련 핸들러들
+  const handleAnswerEditStart = () => {
+    const currentAnswer = selectedQuestion?.answer;
+    if (currentAnswer) {
+      setAnswerForm({
+        matchResult: currentAnswer.predict.matchResult,
+        kuScore: currentAnswer.predict.score.kuScore.toString(),
+        yuScore: currentAnswer.predict.score.yuScore.toString(),
+        kuPlayer: currentAnswer.kuPlayer.playerId || '',
+        yuPlayer: currentAnswer.yuPlayer.playerId || '',
+      });
+    } else {
+      setAnswerForm({
+        matchResult: MatchResult.KOREA_UNIVERSITY,
+        kuScore: '0',
+        yuScore: '0',
+        kuPlayer: '',
+        yuPlayer: '',
+      });
+    }
+    setIsEditingAnswer(true);
+  };
+
+  const handleAnswerEditCancel = () => {
+    setIsEditingAnswer(false);
+  };
+
+  const handleAnswerSave = async () => {
+    const kuScoreNum = Number(answerForm.kuScore);
+    const yuScoreNum = Number(answerForm.yuScore);
+
+    // 경기 결과와 점수 정합성 검사
+    const isValidScore = () => {
+      switch (answerForm.matchResult) {
+        case MatchResult.KOREA_UNIVERSITY:
+          return kuScoreNum > yuScoreNum;
+        case MatchResult.YONSEI_UNIVERSITY:
+          return yuScoreNum > kuScoreNum;
+        case MatchResult.DRAW:
+          return kuScoreNum === yuScoreNum;
+        default:
+          return false;
+      }
+    };
+
+    if (!isValidScore()) {
+      const expectedResult =
+        kuScoreNum > yuScoreNum ? '고려대학교 승리' : yuScoreNum > kuScoreNum ? '연세대학교 승리' : '무승부';
+
+      alert(
+        `점수와 경기 결과가 일치하지 않습니다.\n현재 점수(${kuScoreNum}:${yuScoreNum})로는 "${expectedResult}"가 되어야 합니다.`
+      );
+      return;
+    }
+
+    const answer = {
+      predict: {
+        matchResult: answerForm.matchResult,
+        score: {
+          kuScore: kuScoreNum,
+          yuScore: yuScoreNum,
+        },
+      },
+      kuPlayer: {
+        playerId: answerForm.kuPlayer || null,
+      },
+      yuPlayer: {
+        playerId: answerForm.yuPlayer || null,
+      },
+    };
+
+    await handleSetAnswer(selectedSport, answer);
+    setIsEditingAnswer(false);
+  };
+
+  const handleAnswerDelete = async () => {
+    if (confirm('정답을 삭제하시겠습니까?')) {
+      await handleSetAnswer(selectedSport, null);
+    }
+  };
+
+  // 점수 유효성 검사 및 핸들러
+  const handleKuScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // 빈 문자열이거나 0 이상의 정수만 허용
+    if (value === '' || (/^\d+$/.test(value) && Number(value) >= 0)) {
+      setAnswerForm((prev) => ({ ...prev, kuScore: value }));
+    }
+  };
+
+  const handleYuScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // 빈 문자열이거나 0 이상의 정수만 허용
+    if (value === '' || (/^\d+$/.test(value) && Number(value) >= 0)) {
+      setAnswerForm((prev) => ({ ...prev, yuScore: value }));
+    }
+  };
+
+  // 실시간 정합성 검사
+  const getValidationStatus = () => {
+    const kuScoreNum = Number(answerForm.kuScore);
+    const yuScoreNum = Number(answerForm.yuScore);
+
+    switch (answerForm.matchResult) {
+      case MatchResult.KOREA_UNIVERSITY:
+        return {
+          isValid: kuScoreNum > yuScoreNum,
+          message: kuScoreNum <= yuScoreNum ? '고려대 승리 시 고려대 점수가 더 높아야 합니다.' : '',
+        };
+      case MatchResult.YONSEI_UNIVERSITY:
+        return {
+          isValid: yuScoreNum > kuScoreNum,
+          message: yuScoreNum <= kuScoreNum ? '연세대 승리 시 연세대 점수가 더 높아야 합니다.' : '',
+        };
+      case MatchResult.DRAW:
+        return {
+          isValid: kuScoreNum === yuScoreNum,
+          message: kuScoreNum !== yuScoreNum ? '무승부 시 양팀 점수가 같아야 합니다.' : '',
+        };
+      default:
+        return { isValid: true, message: '' };
+    }
   };
 
   return (
@@ -162,10 +306,207 @@ export function QuestionManager() {
                     {selectedQuestion.positionFilter ? `${selectedQuestion.positionFilter} 포지션` : '모든 선수'}
                   </div>
                 </div>
+
+                {/* 정답 정보 */}
+                <div className="pt-4 border-t border-gray-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-md font-semibold">정답 정보</h4>
+                    <div className="flex gap-2">
+                      {selectedQuestion.answer ? (
+                        <>
+                          <Button onClick={handleAnswerEditStart} size="sm">
+                            ✏️ 정답 수정
+                          </Button>
+                          <Button onClick={() => void handleAnswerDelete()} variant="destructive" size="sm">
+                            🗑️ 정답 삭제
+                          </Button>
+                        </>
+                      ) : (
+                        <Button onClick={handleAnswerEditStart} size="sm">
+                          ➕ 정답 등록
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {selectedQuestion.answer ? (
+                    <div className="bg-primary/10 border border-gray-200 rounded-md p-4">
+                      <div className="space-y-2 text-sm">
+                        <div>
+                          <strong>경기 결과:</strong> {selectedQuestion.answer.predict.matchResult}
+                        </div>
+                        <div>
+                          <strong>점수:</strong> 고려대 {selectedQuestion.answer.predict.score.kuScore} -{' '}
+                          {selectedQuestion.answer.predict.score.yuScore} 연세대
+                        </div>
+                        {selectedQuestion.answer.kuPlayer.playerId &&
+                          (() => {
+                            const kuPlayer = players[selectedSport]?.[University.KOREA_UNIVERSITY]?.find(
+                              (p) => p.id === selectedQuestion.answer!.kuPlayer.playerId
+                            );
+                            return (
+                              <div>
+                                <strong>고려대 선수:</strong>{' '}
+                                {kuPlayer
+                                  ? `${kuPlayer.name}(#${kuPlayer.backNumber}) - ${kuPlayer.position}`
+                                  : `ID: ${selectedQuestion.answer.kuPlayer.playerId}`}
+                              </div>
+                            );
+                          })()}
+                        {selectedQuestion.answer.yuPlayer.playerId &&
+                          (() => {
+                            const yuPlayer = players[selectedSport]?.[University.YONSEI_UNIVERSITY]?.find(
+                              (p) => p.id === selectedQuestion.answer!.yuPlayer.playerId
+                            );
+                            return (
+                              <div>
+                                <strong>연세대 선수:</strong>{' '}
+                                {yuPlayer
+                                  ? `${yuPlayer.name}(#${yuPlayer.backNumber}) - ${yuPlayer.position}`
+                                  : `ID: ${selectedQuestion.answer.yuPlayer.playerId}`}
+                              </div>
+                            );
+                          })()}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-500 border border-gray-200 rounded-md p-4 text-center text-muted-foreground">
+                      정답이 아직 등록되지 않았습니다.
+                    </div>
+                  )}
+                </div>
               </div>
             </Card>
           )}
         </>
+      )}
+
+      {/* 정답 편집 모드 */}
+      {isEditingAnswer && selectedQuestion && (
+        <Card className="p-6 mt-4">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h4 className="text-lg font-semibold">{selectedQuestion.answer ? '정답 수정' : '정답 등록'}</h4>
+              <div className="flex gap-2">
+                <Button onClick={() => void handleAnswerSave()} size="sm" disabled={!getValidationStatus().isValid}>
+                  💾 저장
+                </Button>
+                <Button onClick={handleAnswerEditCancel} variant="secondary" size="sm">
+                  ❌ 취소
+                </Button>
+              </div>
+            </div>
+
+            {/* 경기 결과 선택 */}
+            <div className="flex justify-center">
+              <div className="w-full max-w-xs">
+                <Label htmlFor="matchResult" className="block text-center mb-2">
+                  경기 결과 *
+                </Label>
+                <select
+                  id="matchResult"
+                  value={answerForm.matchResult}
+                  onChange={(e) => setAnswerForm((prev) => ({ ...prev, matchResult: e.target.value as MatchResult }))}
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-center"
+                >
+                  <option value={MatchResult.KOREA_UNIVERSITY}>{MatchResult.KOREA_UNIVERSITY}</option>
+                  <option value={MatchResult.YONSEI_UNIVERSITY}>{MatchResult.YONSEI_UNIVERSITY}</option>
+                  <option value={MatchResult.DRAW}>{MatchResult.DRAW}</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 점수 입력 */}
+            <div className="flex justify-center">
+              <div className="flex gap-4 items-center">
+                <div className="text-center">
+                  <Label htmlFor="kuScore" className="block mb-2">
+                    고려대 점수 *
+                  </Label>
+                  <Input
+                    id="kuScore"
+                    type="text"
+                    inputMode="numeric"
+                    value={answerForm.kuScore}
+                    onChange={handleKuScoreChange}
+                    className="w-24 text-center"
+                    placeholder="0"
+                  />
+                </div>
+                <span className="text-2xl text-muted-foreground mt-6">:</span>
+                <div className="text-center">
+                  <Label htmlFor="yuScore" className="block mb-2">
+                    연세대 점수 *
+                  </Label>
+                  <Input
+                    id="yuScore"
+                    type="text"
+                    inputMode="numeric"
+                    value={answerForm.yuScore}
+                    onChange={handleYuScoreChange}
+                    className="w-24 text-center"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 유효성 검사 메시지 */}
+            {(() => {
+              const validation = getValidationStatus();
+              if (!validation.isValid && validation.message) {
+                return (
+                  <div className="flex justify-center">
+                    <div className="bg-red-50 border border-red-200 rounded-md p-3 text-center">
+                      <p className="text-red-600 text-sm">⚠️ {validation.message}</p>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            {/* 선수 선택 */}
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <div className="flex-1 max-w-xs">
+                <Label htmlFor="kuPlayer" className="block text-center mb-2">
+                  고려대 선수 (선택사항)
+                </Label>
+                <select
+                  id="kuPlayer"
+                  value={answerForm.kuPlayer}
+                  onChange={(e) => setAnswerForm((prev) => ({ ...prev, kuPlayer: e.target.value }))}
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-center"
+                >
+                  <option value="">선수 선택 (선택사항)</option>
+                  {players[selectedSport]?.[University.KOREA_UNIVERSITY]?.map((player) => (
+                    <option key={player.id} value={player.id}>
+                      {player.name} (#{player.backNumber}) - {player.position}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex-1 max-w-xs">
+                <Label htmlFor="yuPlayer" className="block text-center mb-2">
+                  연세대 선수 (선택사항)
+                </Label>
+                <select
+                  id="yuPlayer"
+                  value={answerForm.yuPlayer}
+                  onChange={(e) => setAnswerForm((prev) => ({ ...prev, yuPlayer: e.target.value }))}
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-center"
+                >
+                  <option value="">선수 선택 (선택사항)</option>
+                  {players[selectedSport]?.[University.YONSEI_UNIVERSITY]?.map((player) => (
+                    <option key={player.id} value={player.id}>
+                      {player.name} (#{player.backNumber}) - {player.position}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        </Card>
       )}
     </div>
   );

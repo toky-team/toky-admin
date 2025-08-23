@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import { getQuestion, updateQuestion } from '~/features/question/service/question-service';
+import { getQuestion, setAnswer, updateQuestion } from '~/features/question/service/question-service';
 import type { Question } from '~/features/question/types/question';
+import type { MatchResult } from '~/shared/types/match-result';
 import { Sport } from '~/shared/types/sport';
 
 export function useQuestion() {
@@ -51,10 +52,43 @@ export function useQuestion() {
     }
   };
 
+  const handleSetAnswer = async (
+    sport: Sport,
+    answer: {
+      predict: {
+        matchResult: MatchResult;
+        score: {
+          kuScore: number;
+          yuScore: number;
+        };
+      };
+      kuPlayer: {
+        playerId: string | null;
+      };
+      yuPlayer: {
+        playerId: string | null;
+      };
+    } | null
+  ) => {
+    try {
+      const response = await setAnswer(sport, answer);
+      setQuestions((prev) => {
+        return {
+          ...prev,
+          [sport]: response.data,
+        };
+      });
+      setError(null);
+    } catch (err) {
+      setError(err as Error);
+    }
+  };
+
   return {
     questions,
     error,
     refetch: fetchAll,
     handleUpdate,
+    handleSetAnswer,
   };
 }
