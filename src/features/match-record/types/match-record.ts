@@ -4,6 +4,7 @@ import type { University } from '~/shared/types/university';
 export interface MatchRecord {
   sport: Sport;
   league: string;
+  imageUrl: string | null;
   universityStatKeys: string[];
   universityStats: {
     university: University;

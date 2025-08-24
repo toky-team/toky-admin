@@ -22,6 +22,18 @@ export const putMatchRecords = async (sport: Sport, matchRecords: MatchRecord[])
   );
 };
 
+export const setLeagueImage = async (sport: Sport, league: string, image: File | null) => {
+  const formData = new FormData();
+  formData.append('sport', sport);
+  formData.append('league', league);
+  if (image) formData.append('image', image);
+  return await api.patch<MatchRecord>(`/admin/match-record/image`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
 const recordToParams = (record: MatchRecord): MatchRecordParams => {
   return {
     sport: record.sport,

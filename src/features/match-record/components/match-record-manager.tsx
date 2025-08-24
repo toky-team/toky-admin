@@ -14,6 +14,7 @@ export function MatchRecordManager() {
   const [selectedSport, setSelectedSport] = useState<Sport>(Sport.FOOTBALL);
   const [isCreating, setIsCreating] = useState(false);
   const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
+  const [imageUploadingLeague, setImageUploadingLeague] = useState<string | null>(null);
 
   // 폼 데이터 상태
   const [editingFormData, setEditingFormData] = useState<{
@@ -45,7 +46,7 @@ export function MatchRecordManager() {
   });
 
   // API 훅
-  const { records, error, handleUpdate } = useMatchRecord();
+  const { records, error, handleUpdate, handleSetLeagueImage } = useMatchRecord();
 
   // 스포츠 목록
   const sports = Object.values(Sport);
@@ -237,6 +238,7 @@ export function MatchRecordManager() {
     try {
       const recordData: Omit<MatchRecord, 'sport'> = {
         league: editingFormData.league,
+        imageUrl: null, // 이미지는 별도로 관리
         universityStatKeys: editingFormData.universityStatKeys,
         universityStats: editingFormData.universityStats,
         playerStatsWithCategory: editingFormData.playerStatsWithCategory,
@@ -279,6 +281,33 @@ export function MatchRecordManager() {
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('삭제 실패:', error);
+      }
+    }
+  };
+
+  // 이미지 관련 핸들러
+  const handleImageUpload = async (sport: Sport, league: string, file: File) => {
+    setImageUploadingLeague(league);
+    try {
+      await handleSetLeagueImage(sport, league, file);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('이미지 업로드 실패:', error);
+    } finally {
+      setImageUploadingLeague(null);
+    }
+  };
+
+  const handleImageDelete = async (sport: Sport, league: string) => {
+    if (confirm(`${league} 리그의 이미지를 삭제하시겠습니까?`)) {
+      setImageUploadingLeague(league);
+      try {
+        await handleSetLeagueImage(sport, league, null);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('이미지 삭제 실패:', error);
+      } finally {
+        setImageUploadingLeague(null);
       }
     }
   };
@@ -339,13 +368,27 @@ export function MatchRecordManager() {
 
             {/* 리그 정보 */}
             <div>
-              <Label htmlFor="league">리그명 *</Label>
-              <Input
-                id="league"
-                value={editingFormData.league}
-                onChange={(e) => setEditingFormData((prev) => ({ ...prev, league: e.target.value }))}
-                placeholder="리그명을 입력하세요"
-              />
+              <Label htmlFor="league">리그명</Label>
+              {isCreating ? (
+                <Input
+                  id="league"
+                  value={editingFormData.league}
+                  onChange={(e) => setEditingFormData((prev) => ({ ...prev, league: e.target.value }))}
+                  placeholder="리그명을 입력하세요"
+                />
+              ) : (
+                <div>
+                  <Input
+                    id="league"
+                    value={editingFormData.league}
+                    readOnly
+                    className="bg-gray-800 text-gray-50 cursor-not-allowed"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    리그명은 생성 후 변경할 수 없습니다. 다른 리그명이 필요하면 새로 생성해주세요.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* 대학 통계 편집 */}
@@ -639,6 +682,69 @@ export function MatchRecordManager() {
                     >
                       🗑️ 삭제
                     </Button>
+                  </div>
+                </div>
+
+                {/* 리그 이미지 관리 */}
+                <div className="mb-6 p-4 bg-gray-500 rounded-lg">
+                  <div className="flex items-start gap-6">
+                    {record.imageUrl ? (
+                      <img
+                        src={record.imageUrl}
+                        alt={`${record.league} 다이어그램`}
+                        className="w-32 h-32 object-contain rounded border bg-white shadow-sm"
+                      />
+                    ) : (
+                      <div className="w-32 h-32 bg-gray-200 rounded border flex items-center justify-center shadow-sm">
+                        <span className="text-gray-400 text-sm">이미지 없음</span>
+                      </div>
+                    )}
+
+                    <div className="flex-1">
+                      <h4 className="font-semibold mb-3">리그 이미지</h4>
+                      <div className="flex gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              void handleImageUpload(record.sport, record.league, file);
+                            }
+                          }}
+                          className="hidden"
+                          id={`image-upload-${record.sport}-${record.league}`}
+                          disabled={imageUploadingLeague === record.league}
+                        />
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          disabled={imageUploadingLeague === record.league}
+                          onClick={() => {
+                            const input = document.getElementById(
+                              `image-upload-${record.sport}-${record.league}`
+                            ) as HTMLInputElement;
+                            input?.click();
+                          }}
+                        >
+                          {imageUploadingLeague === record.league
+                            ? '업로드 중...'
+                            : record.imageUrl
+                              ? '🔄 이미지 변경'
+                              : '📷 이미지 추가'}
+                        </Button>
+                        {record.imageUrl && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => void handleImageDelete(record.sport, record.league)}
+                            disabled={imageUploadingLeague === record.league}
+                          >
+                            {imageUploadingLeague === record.league ? '삭제 중...' : '🗑️ 삭제'}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
