@@ -32,6 +32,7 @@ export function PlayerManager() {
     position: string;
     backNumber: string;
     careers: string[];
+    isPrimary: boolean;
     image: File | null;
   }>({
     name: '',
@@ -44,6 +45,7 @@ export function PlayerManager() {
     position: '',
     backNumber: '',
     careers: [],
+    isPrimary: false,
     image: null as File | null,
   });
 
@@ -94,6 +96,7 @@ export function PlayerManager() {
       position: '',
       backNumber: '',
       careers: [],
+      isPrimary: false,
       image: null,
     });
   };
@@ -111,6 +114,7 @@ export function PlayerManager() {
       position: player.position,
       backNumber: player.backNumber.toString(),
       careers: [...player.careers],
+      isPrimary: player.isPrimary,
       image: null,
     });
   };
@@ -129,6 +133,7 @@ export function PlayerManager() {
       position: '',
       backNumber: '',
       careers: [],
+      isPrimary: false,
       image: null,
     });
   };
@@ -164,6 +169,7 @@ export function PlayerManager() {
         position: formData.position,
         backNumber,
         careers: formData.careers,
+        isPrimary: formData.isPrimary,
         image: formData.image,
       });
     } else if (editingPlayerId) {
@@ -178,6 +184,7 @@ export function PlayerManager() {
         position: formData.position,
         backNumber,
         careers: formData.careers,
+        isPrimary: formData.isPrimary,
         image: formData.image ?? undefined,
       });
     }
@@ -357,6 +364,18 @@ export function PlayerManager() {
                   className="[&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    id="isPrimary"
+                    type="checkbox"
+                    checked={formData.isPrimary}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, isPrimary: e.target.checked }))}
+                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                  />
+                  <Label htmlFor="isPrimary">주요 선수</Label>
+                </div>
+              </div>
               <div className="md:col-span-2">
                 <Label htmlFor="image">선수 이미지 *</Label>
                 <Input id="image" type="file" accept="image/*" onChange={handleImageChange} />
@@ -501,6 +520,18 @@ export function PlayerManager() {
                                   className="text-sm [&::-webkit-inner-spin-button]:appearance-none"
                                 />
                               </div>
+                              <div>
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    id="edit-isPrimary"
+                                    type="checkbox"
+                                    checked={formData.isPrimary}
+                                    onChange={(e) => setFormData((prev) => ({ ...prev, isPrimary: e.target.checked }))}
+                                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                                  />
+                                  <Label htmlFor="edit-isPrimary">주요 선수</Label>
+                                </div>
+                              </div>
                               <div className="md:col-span-2">
                                 <Label htmlFor="edit-image">선수 이미지</Label>
                                 <Input
@@ -554,7 +585,14 @@ export function PlayerManager() {
                             >
                               <div className="flex items-center gap-4">
                                 <span className="text-lg font-bold text-primary">#{player.backNumber}</span>
-                                <h4 className="font-semibold text-lg">{player.name}</h4>
+                                <h4 className="font-semibold text-lg">
+                                  {player.name}
+                                  {player.isPrimary && (
+                                    <span className="ml-2 text-yellow-500" title="주요 선수">
+                                      ⭐
+                                    </span>
+                                  )}
+                                </h4>
                                 <span className="text-sm text-muted-foreground">🏫 {player.department}</span>
                               </div>
                               <div className="flex items-center gap-2">
@@ -584,6 +622,14 @@ export function PlayerManager() {
                                     <div className="flex items-center gap-2">
                                       <span className="font-medium">⚖️ 체중:</span>
                                       <span>{player.weight}kg</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium">⭐ 주요 선수:</span>
+                                      <span
+                                        className={`font-medium ${player.isPrimary ? 'text-yellow-600' : 'text-gray-400'}`}
+                                      >
+                                        {player.isPrimary ? '✓' : '✗'}
+                                      </span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                       <span className="font-medium">❤️ 좋아요:</span>

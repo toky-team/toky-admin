@@ -127,6 +127,7 @@ export function usePlayer() {
     position: string;
     backNumber: number;
     careers: string[];
+    isPrimary: boolean;
     image: File;
   }) => {
     try {
@@ -163,6 +164,7 @@ export function usePlayer() {
       position?: string;
       backNumber?: number;
       careers?: string[];
+      isPrimary?: boolean;
       image?: File;
     }
   ) => {

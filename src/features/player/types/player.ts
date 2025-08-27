@@ -15,4 +15,5 @@ export interface Player {
   careers: string[];
   imageUrl: string;
   likeCount: number;
+  isPrimary: boolean;
 }

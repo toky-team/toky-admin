@@ -24,9 +24,23 @@ export const createPlayer = async (params: {
   position: string;
   backNumber: number;
   careers: string[];
+  isPrimary: boolean;
   image: File;
 }) => {
-  const { name, university, sport, department, birth, height, weight, position, backNumber, careers, image } = params;
+  const {
+    name,
+    university,
+    sport,
+    department,
+    birth,
+    height,
+    weight,
+    position,
+    backNumber,
+    careers,
+    isPrimary,
+    image,
+  } = params;
 
   const formData = new FormData();
   formData.append('name', name);
@@ -39,6 +53,7 @@ export const createPlayer = async (params: {
   formData.append('position', position);
   formData.append('backNumber', backNumber.toString());
   formData.append('careers', JSON.stringify(careers));
+  formData.append('isPrimary', isPrimary.toString());
   formData.append('image', image);
 
   return await api.post<Player>('/admin/player', formData, {
@@ -61,10 +76,24 @@ export const updatePlayer = async (
     position?: string;
     backNumber?: number;
     careers?: string[];
+    isPrimary?: boolean;
     image?: File;
   }
 ) => {
-  const { name, university, sport, department, birth, height, weight, position, backNumber, careers, image } = parmas;
+  const {
+    name,
+    university,
+    sport,
+    department,
+    birth,
+    height,
+    weight,
+    position,
+    backNumber,
+    careers,
+    isPrimary,
+    image,
+  } = parmas;
 
   const formData = new FormData();
   if (name !== undefined && name.trim() !== '') {
@@ -96,6 +125,9 @@ export const updatePlayer = async (
   }
   if (careers !== undefined) {
     formData.append('careers', JSON.stringify(careers));
+  }
+  if (isPrimary !== undefined) {
+    formData.append('isPrimary', isPrimary.toString());
   }
   if (image) {
     formData.append('image', image);
