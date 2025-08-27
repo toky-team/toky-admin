@@ -10,6 +10,7 @@ const navItems = [
   { label: '좋아요 관리', to: '/like' },
   { label: '라이브 URL 관리', to: '/live-url' },
   { label: '경품 관리', to: '/gift' },
+  { label: '채팅 관리', to: '/chat' },
 ];
 
 interface SidebarProps {

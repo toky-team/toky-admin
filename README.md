@@ -129,3 +129,6 @@ React, Vite, Zustand, Axios, Tailwind
 
 - 경품 관리
   - 경품 목록 및 별칭, 필요 응모권 수 등 관리
+
+- 채팅 관리
+  - 채팅 목록 확인 및 삭제(필터링)
