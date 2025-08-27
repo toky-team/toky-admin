@@ -144,7 +144,7 @@ export function QuestionManager() {
   };
 
   const handleAnswerDelete = async () => {
-    if (confirm('정답을 삭제하시겠습니까?')) {
+    if (confirm('정답을 삭제하시겠습니까?\n\n⚠️ 주의: 이미 지급된 응모권은 회수할 수 없습니다.')) {
       await handleSetAnswer(selectedSport, null);
     }
   };
