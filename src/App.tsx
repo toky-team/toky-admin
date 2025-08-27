@@ -13,6 +13,7 @@ import MatchRecordPage from '~/pages/match-record/match-record.page';
 import PlayerPage from '~/pages/player/player.page';
 import QuestionPage from '~/pages/question/question.page';
 import ScorePage from '~/pages/score/score.page';
+import UserPage from '~/pages/user/user.page';
 import RequireAuth from '~/shared/components/require-auth';
 import AppLayout from '~/shared/layouts/app-layout';
 import PublicLayout from '~/shared/layouts/public-layout';
@@ -42,6 +43,7 @@ export default function App() {
               <Route path="/live-url" element={<LiveUrlPage />} />
               <Route path="/gift" element={<GiftPage />} />
               <Route path="/chat" element={<ChatPage />} />
+              <Route path="/user" element={<UserPage />} />
             </Route>
           </Route>
 

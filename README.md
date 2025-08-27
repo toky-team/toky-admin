@@ -132,3 +132,6 @@ React, Vite, Zustand, Axios, Tailwind
 
 - 채팅 관리
   - 채팅 목록 확인 및 삭제(필터링)
+
+- 사용자 관리
+  - 사용자 목록 확인 및 응모권 지급

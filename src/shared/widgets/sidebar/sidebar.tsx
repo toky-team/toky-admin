@@ -11,6 +11,7 @@ const navItems = [
   { label: '라이브 URL 관리', to: '/live-url' },
   { label: '경품 관리', to: '/gift' },
   { label: '채팅 관리', to: '/chat' },
+  { label: '사용자 관리', to: '/user' },
 ];
 
 interface SidebarProps {
