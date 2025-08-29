@@ -113,7 +113,7 @@ export function PlayerManager() {
       weight: player.weight.toString(),
       position: player.position,
       backNumber: player.backNumber.toString(),
-      careers: [...player.careers],
+      careers: Array.isArray(player.careers) ? [...player.careers] : [],
       isPrimary: player.isPrimary,
       image: null,
     });
