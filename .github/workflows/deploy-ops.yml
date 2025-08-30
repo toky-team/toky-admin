@@ -32,6 +32,6 @@ jobs:
           host: ${{ secrets.OPS_HOST }}
           username: ${{ secrets.OPS_USER }}
           key: ${{ secrets.OPS_SSH_KEY }}
-          source: |
-            dist/*
+          source: "dist"
           target: /srv/admin/current/
+          strip_components: 1
