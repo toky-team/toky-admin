@@ -314,9 +314,6 @@ export function QuestionManager() {
                     <div className="flex gap-2">
                       {selectedQuestion.answer ? (
                         <>
-                          <Button onClick={handleAnswerEditStart} size="sm">
-                            ✏️ 정답 수정
-                          </Button>
                           <Button onClick={() => void handleAnswerDelete()} variant="destructive" size="sm">
                             🗑️ 정답 삭제
                           </Button>
