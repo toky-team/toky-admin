@@ -1,7 +1,10 @@
+import { Download, Upload } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { useMatchRecord } from '~/features/match-record/hooks/use-match-record';
 import type { MatchRecord } from '~/features/match-record/types/match-record';
+import { ExcelUploader } from '~/shared/components/excel-uploader';
+import { createExcelTemplate, createExcelTemplateWithData, type ExcelRow } from '~/shared/lib/excel-utils';
 import { emojiMap, Sport } from '~/shared/types/sport';
 import { University } from '~/shared/types/university';
 import { Button } from '~/shared/ui/button';
@@ -15,6 +18,8 @@ export function MatchRecordManager() {
   const [isCreating, setIsCreating] = useState(false);
   const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
   const [imageUploadingLeague, setImageUploadingLeague] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
 
   // 폼 데이터 상태
   const [editingFormData, setEditingFormData] = useState<{
@@ -51,7 +56,126 @@ export function MatchRecordManager() {
   // 스포츠 목록
   const sports = Object.values(Sport);
 
-  // 선택된 스포츠의 기록들
+  // 카테고리별 선수 통계용 엑셀 템플릿 다운로드
+  const handleDownloadCategoryPlayerStatsTemplate = (categoryIndex: number) => {
+    const category = editingFormData.playerStatsWithCategory[categoryIndex];
+    const existingStatKeys = category.playerStatKeys || [];
+    const existingPlayerStats = category.playerStats || [];
+
+    const headers = [
+      '이름',
+      '대학교',
+      '포지션',
+      ...existingStatKeys, // 해당 카테고리의 기존 통계 항목들
+    ];
+
+    const categoryName = category.category || `카테고리${categoryIndex + 1}`;
+
+    // 기존 데이터가 있으면 데이터 포함 템플릿, 없으면 빈 템플릿 생성
+    if (existingPlayerStats.length > 0) {
+      // 기존 데이터를 엑셀 행 형태로 변환
+      const excelData = existingPlayerStats.map((player) => {
+        const row: Record<string, unknown> = {
+          이름: player.name,
+          대학교: player.university,
+          포지션: player.position || '',
+        };
+
+        // 통계 데이터 추가
+        existingStatKeys.forEach((statKey) => {
+          row[statKey] = player.stats[statKey] || '';
+        });
+
+        return row;
+      });
+
+      createExcelTemplateWithData(headers, excelData, `${selectedSport}_${categoryName}_선수통계_데이터포함.xlsx`);
+    } else {
+      // 빈 템플릿 생성
+      createExcelTemplate(headers, `${selectedSport}_${categoryName}_선수통계_템플릿.xlsx`);
+    }
+  };
+
+  const handleRecordUploadError = (error: string) => {
+    setUploadError(error);
+    setUploadSuccess(null);
+  };
+
+  // 카테고리별 선수 통계 엑셀 데이터 처리
+  const handleCategoryPlayerStatsExcelUpload = (data: ExcelRow[], categoryIndex: number) => {
+    setUploadError(null);
+    setUploadSuccess(null);
+
+    if (data.length === 0) {
+      setUploadError('엑셀 파일에 데이터가 없습니다.');
+      return;
+    }
+
+    try {
+      // 첫 번째 행에서 헤더 정보 추출
+      const firstRow = data[0];
+      const headers = Object.keys(firstRow);
+
+      // 기본 컬럼들 확인
+      const requiredColumns = ['이름', '대학교'];
+      const missingColumns = requiredColumns.filter((col) => !headers.includes(col));
+
+      if (missingColumns.length > 0) {
+        setUploadError(`필수 컬럼이 누락되었습니다: ${missingColumns.join(', ')}`);
+        return;
+      }
+
+      // 통계 항목 추출 (이름, 대학교, 포지션 제외)
+      const playerStatKeys = headers.filter((header) => !['이름', '대학교', '포지션'].includes(header));
+
+      // 선수 데이터 변환
+      const playerStats = data.map((row) => {
+        const stats: Record<string, string> = {};
+        playerStatKeys.forEach((key) => {
+          const value = row[key];
+          if (typeof value === 'string' || typeof value === 'number') {
+            stats[key] = String(value);
+          } else {
+            stats[key] = '0';
+          }
+        });
+
+        return {
+          playerId: null,
+          name: typeof row['이름'] === 'string' ? row['이름'] : '',
+          university: (typeof row['대학교'] === 'string' ? row['대학교'] : '') as University,
+          position: typeof row['포지션'] === 'string' ? row['포지션'] : null,
+          stats,
+        };
+      });
+
+      // 현재 편집 중인 폼의 특정 카테고리에 반영
+      setEditingFormData((prev) => {
+        const newPlayerStatsWithCategory = [...prev.playerStatsWithCategory];
+
+        if (newPlayerStatsWithCategory[categoryIndex]) {
+          newPlayerStatsWithCategory[categoryIndex] = {
+            ...newPlayerStatsWithCategory[categoryIndex],
+            playerStatKeys,
+            playerStats,
+          };
+        }
+
+        return {
+          ...prev,
+          playerStatsWithCategory: newPlayerStatsWithCategory,
+        };
+      });
+
+      const categoryName =
+        editingFormData.playerStatsWithCategory[categoryIndex]?.category || `카테고리 #${categoryIndex + 1}`;
+      setUploadSuccess(
+        `${categoryName}에 ${data.length}명의 선수 통계 데이터가 성공적으로 로드되었습니다. (통계 항목: ${playerStatKeys.join(', ')})`
+      );
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : '데이터 처리 중 오류가 발생했습니다.');
+    }
+  };
   const selectedRecords = useMemo(() => records[selectedSport] || [], [records, selectedSport]);
 
   // 폼 초기화
@@ -344,6 +468,19 @@ export function MatchRecordManager() {
         </Button>
       </div>
 
+      {/* 업로드 결과 메시지 - 생성/편집 중일 때만 표시 */}
+      {(isCreating || editingRecordId) && uploadError && (
+        <Card className="p-4 border-red-200 bg-red-50">
+          <p className="text-red-500 text-sm">⚠️ {uploadError}</p>
+        </Card>
+      )}
+
+      {(isCreating || editingRecordId) && uploadSuccess && (
+        <Card className="p-4 border-green-200 bg-green-50">
+          <p className="text-green-600 text-sm">✅ {uploadSuccess}</p>
+        </Card>
+      )}
+
       {/* 에러 메시지 */}
       {error && (
         <Card className="p-4 border-red-200 bg-red-50">
@@ -474,35 +611,59 @@ export function MatchRecordManager() {
                   <Card key={categoryIndex} className="p-4 border-blue-200">
                     <div className="space-y-4">
                       {/* 카테고리 헤더 */}
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-start">
                         <h5 className="font-medium text-blue-700">
                           📊 {category.category || `카테고리 #${categoryIndex + 1}`}
                         </h5>
-                        <div className="flex gap-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleAddPlayerStatKey(categoryIndex)}
-                          >
-                            📈 통계 항목 추가
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleAddPlayer(categoryIndex)}
-                          >
-                            👤 선수 추가
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleRemovePlayerCategory(categoryIndex)}
-                          >
-                            🗑️ 카테고리 삭제
-                          </Button>
+                        <div className="flex flex-col gap-2">
+                          {/* 엑셀 관련 버튼들 */}
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDownloadCategoryPlayerStatsTemplate(categoryIndex)}
+                            >
+                              <Download className="w-3 h-3 mr-1" />
+                              템플릿 다운로드
+                            </Button>
+                            <ExcelUploader
+                              onDataParsed={(data) => handleCategoryPlayerStatsExcelUpload(data, categoryIndex)}
+                              onError={handleRecordUploadError}
+                            >
+                              <Button type="button" variant="outline" size="sm">
+                                <Upload className="w-3 h-3 mr-1" />
+                                엑셀 업로드
+                              </Button>
+                            </ExcelUploader>
+                          </div>
+                          {/* 데이터 관리 버튼들 */}
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleAddPlayerStatKey(categoryIndex)}
+                            >
+                              📈 통계 항목 추가
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleAddPlayer(categoryIndex)}
+                            >
+                              👤 선수 추가
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleRemovePlayerCategory(categoryIndex)}
+                            >
+                              🗑️ 카테고리 삭제
+                            </Button>
+                          </div>
                         </div>
                       </div>
 
