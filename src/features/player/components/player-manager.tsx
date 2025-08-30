@@ -65,8 +65,8 @@ export function PlayerManager() {
   const handleNumberChange =
     (field: 'height' | 'weight' | 'backNumber') => (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      // 빈 문자열이거나 양수만 허용
-      if (value === '' || (/^\d+$/.test(value) && Number(value) > 0)) {
+      // 빈 문자열이거나 0 이상의 정수만 허용
+      if (value === '' || (/^\d+$/.test(value) && Number(value) >= 0)) {
         setFormData((prev) => ({ ...prev, [field]: value }));
       }
     };
@@ -146,8 +146,8 @@ export function PlayerManager() {
 
     const backNumber = Number(formData.backNumber);
 
-    if (backNumber <= 0) {
-      alert('등번호는 0보다 큰 값이어야 합니다.');
+    if (backNumber < 0) {
+      alert('등번호는 0이상의 값이어야 합니다.');
       return;
     }
 
