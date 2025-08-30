@@ -108,9 +108,9 @@ export function PlayerManager() {
       university: player.university,
       sport: player.sport,
       department: player.department,
-      birth: formatDateForInput(player.birth),
-      height: player.height.toString(),
-      weight: player.weight.toString(),
+      birth: player.birth ? formatDateForInput(player.birth) : '',
+      height: player.height?.toString() ?? '',
+      weight: player.weight?.toString() ?? '',
       position: player.position,
       backNumber: player.backNumber.toString(),
       careers: Array.isArray(player.careers) ? [...player.careers] : [],
@@ -139,17 +139,31 @@ export function PlayerManager() {
   };
 
   const handleSave = async () => {
-    if (!formData.name.trim() || !formData.department.trim() || !formData.position.trim() || !formData.birth.trim()) {
+    if (!formData.name.trim() || !formData.department.trim() || !formData.position.trim()) {
       alert('필수 정보를 모두 입력해주세요.');
       return;
     }
 
-    const height = Number(formData.height);
-    const weight = Number(formData.weight);
     const backNumber = Number(formData.backNumber);
 
-    if (height <= 0 || weight <= 0 || backNumber <= 0) {
-      alert('키, 몸무게, 등번호는 0보다 큰 값이어야 합니다.');
+    if (backNumber <= 0) {
+      alert('등번호는 0보다 큰 값이어야 합니다.');
+      return;
+    }
+
+    // height, weight, birth는 nullable이므로 빈 값이면 null로 처리
+    const height = formData.height ? Number(formData.height) : null;
+    const weight = formData.weight ? Number(formData.weight) : null;
+    const birth = formData.birth ? formatDateForStorage(formData.birth) : null;
+
+    // height, weight가 입력된 경우 유효성 검사
+    if (height !== null && height <= 0) {
+      alert('키는 0보다 큰 값이어야 합니다.');
+      return;
+    }
+
+    if (weight !== null && weight <= 0) {
+      alert('몸무게는 0보다 큰 값이어야 합니다.');
       return;
     }
 
@@ -163,7 +177,7 @@ export function PlayerManager() {
         university: formData.university,
         sport: formData.sport,
         department: formData.department,
-        birth: formatDateForStorage(formData.birth),
+        birth,
         height,
         weight,
         position: formData.position,
@@ -178,7 +192,7 @@ export function PlayerManager() {
         university: formData.university,
         sport: formData.sport,
         department: formData.department,
-        birth: formatDateForStorage(formData.birth),
+        birth,
         height,
         weight,
         position: formData.position,
@@ -320,7 +334,7 @@ export function PlayerManager() {
                 />
               </div>
               <div>
-                <Label htmlFor="birth">생년월일 *</Label>
+                <Label htmlFor="birth">생년월일</Label>
                 <Input
                   id="birth"
                   type="date"
@@ -341,7 +355,7 @@ export function PlayerManager() {
                 />
               </div>
               <div>
-                <Label htmlFor="height">키 (cm) *</Label>
+                <Label htmlFor="height">키 (cm)</Label>
                 <Input
                   id="height"
                   type="text"
@@ -353,7 +367,7 @@ export function PlayerManager() {
                 />
               </div>
               <div>
-                <Label htmlFor="weight">몸무게 (kg) *</Label>
+                <Label htmlFor="weight">몸무게 (kg)</Label>
                 <Input
                   id="weight"
                   type="text"
@@ -475,7 +489,7 @@ export function PlayerManager() {
                                 />
                               </div>
                               <div>
-                                <Label htmlFor="edit-birth">생년월일 *</Label>
+                                <Label htmlFor="edit-birth">생년월일</Label>
                                 <Input
                                   id="edit-birth"
                                   type="date"
@@ -497,7 +511,7 @@ export function PlayerManager() {
                                 />
                               </div>
                               <div>
-                                <Label htmlFor="edit-height">키 (cm) *</Label>
+                                <Label htmlFor="edit-height">키 (cm)</Label>
                                 <Input
                                   id="edit-height"
                                   type="text"
@@ -509,7 +523,7 @@ export function PlayerManager() {
                                 />
                               </div>
                               <div>
-                                <Label htmlFor="edit-weight">몸무게 (kg) *</Label>
+                                <Label htmlFor="edit-weight">몸무게 (kg)</Label>
                                 <Input
                                   id="edit-weight"
                                   type="text"
@@ -609,7 +623,7 @@ export function PlayerManager() {
                                   <div className="space-y-2">
                                     <div className="flex items-center gap-2">
                                       <span className="font-medium">📅 생년월일:</span>
-                                      <span>{player.birth}</span>
+                                      <span>{player.birth || '-'}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                       <span className="font-medium">🏃 포지션:</span>
@@ -617,11 +631,11 @@ export function PlayerManager() {
                                     </div>
                                     <div className="flex items-center gap-2">
                                       <span className="font-medium">📏 신장:</span>
-                                      <span>{player.height}cm</span>
+                                      <span>{player.height ? `${player.height}cm` : '-'}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                       <span className="font-medium">⚖️ 체중:</span>
-                                      <span>{player.weight}kg</span>
+                                      <span>{player.weight ? `${player.weight}kg` : '-'}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                       <span className="font-medium">⭐ 주요 선수:</span>

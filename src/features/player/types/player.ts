@@ -7,9 +7,9 @@ export interface Player {
   university: University;
   sport: Sport;
   department: string;
-  birth: string;
-  height: number;
-  weight: number;
+  birth: string | null;
+  height: number | null;
+  weight: number | null;
   position: string;
   backNumber: number;
   careers: string[];

@@ -121,9 +121,9 @@ export function usePlayer() {
     university: University;
     sport: Sport;
     department: string;
-    birth: string;
-    height: number;
-    weight: number;
+    birth: string | null;
+    height: number | null;
+    weight: number | null;
     position: string;
     backNumber: number;
     careers: string[];
@@ -154,17 +154,17 @@ export function usePlayer() {
   const handleUpdate = async (
     playerId: string,
     params: {
-      name?: string;
-      university?: University;
-      sport?: Sport;
-      department?: string;
-      birth?: string;
-      height?: number;
-      weight?: number;
-      position?: string;
-      backNumber?: number;
-      careers?: string[];
-      isPrimary?: boolean;
+      name: string;
+      university: University;
+      sport: Sport;
+      department: string;
+      birth: string | null;
+      height: number | null;
+      weight: number | null;
+      position: string;
+      backNumber: number;
+      careers: string[];
+      isPrimary: boolean;
       image?: File;
     }
   ) => {

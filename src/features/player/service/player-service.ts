@@ -18,9 +18,9 @@ export const createPlayer = async (params: {
   university: University;
   sport: Sport;
   department: string;
-  birth: string;
-  height: number;
-  weight: number;
+  birth: string | null;
+  height: number | null;
+  weight: number | null;
   position: string;
   backNumber: number;
   careers: string[];
@@ -47,9 +47,9 @@ export const createPlayer = async (params: {
   formData.append('university', university);
   formData.append('sport', sport);
   formData.append('department', department);
-  formData.append('birth', birth);
-  formData.append('height', height.toString());
-  formData.append('weight', weight.toString());
+  formData.append('birth', birth ?? '');
+  formData.append('height', height?.toString() ?? '');
+  formData.append('weight', weight?.toString() ?? '');
   formData.append('position', position);
   formData.append('backNumber', backNumber.toString());
   formData.append('careers', JSON.stringify(careers));
@@ -66,17 +66,17 @@ export const createPlayer = async (params: {
 export const updatePlayer = async (
   playerId: string,
   parmas: {
-    name?: string;
-    university?: University;
-    sport?: Sport;
-    department?: string;
-    birth?: string;
-    height?: number;
-    weight?: number;
-    position?: string;
-    backNumber?: number;
-    careers?: string[];
-    isPrimary?: boolean;
+    name: string;
+    university: University;
+    sport: Sport;
+    department: string;
+    birth: string | null;
+    height: number | null;
+    weight: number | null;
+    position: string;
+    backNumber: number;
+    careers: string[];
+    isPrimary: boolean;
     image?: File;
   }
 ) => {
@@ -96,39 +96,17 @@ export const updatePlayer = async (
   } = parmas;
 
   const formData = new FormData();
-  if (name !== undefined && name.trim() !== '') {
-    formData.append('name', name);
-  }
-  if (university !== undefined) {
-    formData.append('university', university);
-  }
-  if (sport !== undefined) {
-    formData.append('sport', sport);
-  }
-  if (department !== undefined && department.trim() !== '') {
-    formData.append('department', department);
-  }
-  if (birth !== undefined && birth.trim() !== '') {
-    formData.append('birth', birth);
-  }
-  if (height !== undefined) {
-    formData.append('height', height.toString());
-  }
-  if (weight !== undefined) {
-    formData.append('weight', weight.toString());
-  }
-  if (position !== undefined && position.trim() !== '') {
-    formData.append('position', position);
-  }
-  if (backNumber !== undefined) {
-    formData.append('backNumber', backNumber.toString());
-  }
-  if (careers !== undefined) {
-    formData.append('careers', JSON.stringify(careers));
-  }
-  if (isPrimary !== undefined) {
-    formData.append('isPrimary', isPrimary.toString());
-  }
+  formData.append('name', name);
+  formData.append('university', university);
+  formData.append('sport', sport);
+  formData.append('department', department);
+  formData.append('birth', birth ?? '');
+  formData.append('height', height?.toString() ?? '');
+  formData.append('weight', weight?.toString() ?? '');
+  formData.append('position', position);
+  formData.append('backNumber', backNumber.toString());
+  formData.append('careers', JSON.stringify(careers));
+  formData.append('isPrimary', isPrimary.toString());
   if (image) {
     formData.append('image', image);
   }
