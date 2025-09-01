@@ -709,7 +709,7 @@ export function MatchRecordManager() {
                       )}
 
                       {/* 선수 통계 테이블 */}
-                      {category.playerStats.length > 0 && category.playerStatKeys.length > 0 && (
+                      {category.playerStats.length > 0 && (
                         <div className="overflow-x-auto">
                           <table className="w-full border-collapse border border-gray-300">
                             <thead>
