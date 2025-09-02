@@ -24,6 +24,8 @@ export function MatchRecordManager() {
   // 폼 데이터 상태
   const [editingFormData, setEditingFormData] = useState<{
     league: string;
+    winningComment: string;
+    leagueFullName: string;
     universityStatKeys: string[];
     universityStats: Array<{
       university: University;
@@ -42,6 +44,8 @@ export function MatchRecordManager() {
     }>;
   }>({
     league: '',
+    winningComment: '',
+    leagueFullName: '',
     universityStatKeys: [],
     universityStats: [
       { university: University.KOREA_UNIVERSITY, stats: {} },
@@ -57,6 +61,8 @@ export function MatchRecordManager() {
   const resetForm = () => {
     setEditingFormData({
       league: '',
+      winningComment: '',
+      leagueFullName: '',
       universityStatKeys: [],
       universityStats: [
         { university: University.KOREA_UNIVERSITY, stats: {} },
@@ -361,6 +367,8 @@ export function MatchRecordManager() {
   const handleEditStart = (record: MatchRecord) => {
     setEditingFormData({
       league: record.league,
+      winningComment: record.winningComment,
+      leagueFullName: record.leagueFullName,
       universityStatKeys: record.universityStatKeys,
       universityStats: record.universityStats,
       playerStatsWithCategory: record.playerStatsWithCategory,
@@ -372,6 +380,8 @@ export function MatchRecordManager() {
     try {
       const recordData: Omit<MatchRecord, 'sport'> = {
         league: editingFormData.league,
+        winningComment: editingFormData.winningComment,
+        leagueFullName: editingFormData.leagueFullName,
         imageUrl: null, // 이미지는 별도로 관리
         universityStatKeys: editingFormData.universityStatKeys,
         universityStats: editingFormData.universityStats,
@@ -536,6 +546,28 @@ export function MatchRecordManager() {
                   </p>
                 </div>
               )}
+            </div>
+
+            {/* 승부 코멘트 */}
+            <div>
+              <Label htmlFor="winningComment">승부 코멘트</Label>
+              <Input
+                id="winningComment"
+                value={editingFormData.winningComment}
+                onChange={(e) => setEditingFormData((prev) => ({ ...prev, winningComment: e.target.value }))}
+                placeholder="승부 코멘트를 입력하세요"
+              />
+            </div>
+
+            {/* 리그 전체명 */}
+            <div>
+              <Label htmlFor="leagueFullName">리그 전체명</Label>
+              <Input
+                id="leagueFullName"
+                value={editingFormData.leagueFullName}
+                onChange={(e) => setEditingFormData((prev) => ({ ...prev, leagueFullName: e.target.value }))}
+                placeholder="리그 전체명을 입력하세요"
+              />
             </div>
 
             {/* 대학 통계 편집 */}
@@ -837,6 +869,12 @@ export function MatchRecordManager() {
                   <div>
                     <h3 className="text-lg font-semibold">{record.sport}</h3>
                     <p className="text-sm text-muted-foreground">리그: {record.league}</p>
+                    {record.leagueFullName && (
+                      <p className="text-sm text-muted-foreground">리그 전체명: {record.leagueFullName}</p>
+                    )}
+                    {record.winningComment && (
+                      <p className="text-sm text-muted-foreground">승부 코멘트: {record.winningComment}</p>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <Button

@@ -4,6 +4,8 @@ import type { University } from '~/shared/types/university';
 export interface MatchRecordParams {
   sport: Sport;
   league: string;
+  winningComment: string;
+  leagueFullName: string;
   universityStats: {
     university: University;
     stats: Record<string, string>;

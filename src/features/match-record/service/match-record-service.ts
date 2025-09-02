@@ -38,6 +38,8 @@ const recordToParams = (record: MatchRecord): MatchRecordParams => {
   return {
     sport: record.sport,
     league: record.league,
+    winningComment: record.winningComment,
+    leagueFullName: record.leagueFullName,
     universityStats: record.universityStats.map((stat) => ({
       university: stat.university,
       stats: stat.stats,

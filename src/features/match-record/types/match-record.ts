@@ -5,6 +5,8 @@ export interface MatchRecord {
   sport: Sport;
   league: string;
   imageUrl: string | null;
+  winningComment: string;
+  leagueFullName: string;
   universityStatKeys: string[];
   universityStats: {
     university: University;
