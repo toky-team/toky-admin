@@ -272,7 +272,9 @@ export function GiftManager() {
 
                     {/* 경품 정보 */}
                     <div className="space-y-2">
-                      <h4 className="font-semibold text-lg">{gift.name}</h4>
+                      <h4 className="font-semibold text-lg" style={{ whiteSpace: 'pre-line' }}>
+                        {gift.name.replace(/\\n/g, '\n')}
+                      </h4>
                       <div className="space-y-1 text-sm text-gray-600">
                         <div className="flex items-center gap-2">
                           <span className="font-medium">🏷️ 별칭:</span>
