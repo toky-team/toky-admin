@@ -53,7 +53,7 @@ export const createPlayer = async (params: {
   formData.append('position', position);
   formData.append('backNumber', backNumber.toString());
   formData.append('careers', JSON.stringify(careers));
-  formData.append('isPrimary', isPrimary.toString());
+  formData.append('isPrimary', isPrimary ? isPrimary.toString() : '');
   formData.append('image', image);
 
   return await api.post<Player>('/admin/player', formData, {
@@ -106,7 +106,7 @@ export const updatePlayer = async (
   formData.append('position', position);
   formData.append('backNumber', backNumber.toString());
   formData.append('careers', JSON.stringify(careers));
-  formData.append('isPrimary', isPrimary.toString());
+  formData.append('isPrimary', isPrimary ? isPrimary.toString() : '');
   if (image) {
     formData.append('image', image);
   }

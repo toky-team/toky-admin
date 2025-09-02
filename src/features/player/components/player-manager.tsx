@@ -540,7 +540,9 @@ export function PlayerManager() {
                                     id="edit-isPrimary"
                                     type="checkbox"
                                     checked={formData.isPrimary}
-                                    onChange={(e) => setFormData((prev) => ({ ...prev, isPrimary: e.target.checked }))}
+                                    onChange={(e) => {
+                                      setFormData((prev) => ({ ...prev, isPrimary: e.target.checked }));
+                                    }}
                                     className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                                   />
                                   <Label htmlFor="edit-isPrimary">주요 선수</Label>
