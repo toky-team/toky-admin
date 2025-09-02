@@ -1,5 +1,5 @@
 import { Download, Upload } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useMatchRecord } from '~/features/match-record/hooks/use-match-record';
 import type { MatchRecord } from '~/features/match-record/types/match-record';
@@ -52,6 +52,29 @@ export function MatchRecordManager() {
 
   // API 훅
   const { records, error, handleUpdate, handleSetLeagueImage } = useMatchRecord();
+
+  // 폼 초기화
+  const resetForm = () => {
+    setEditingFormData({
+      league: '',
+      universityStatKeys: [],
+      universityStats: [
+        { university: University.KOREA_UNIVERSITY, stats: {} },
+        { university: University.YONSEI_UNIVERSITY, stats: {} },
+      ],
+      playerStatsWithCategory: [],
+    });
+  };
+
+  // 스포츠 변경 시 상태 초기화
+  useEffect(() => {
+    setIsCreating(false);
+    setEditingRecordId(null);
+    setImageUploadingLeague(null);
+    setUploadError(null);
+    setUploadSuccess(null);
+    resetForm();
+  }, [selectedSport]);
 
   // 스포츠 목록
   const sports = Object.values(Sport);
@@ -177,19 +200,6 @@ export function MatchRecordManager() {
     }
   };
   const selectedRecords = useMemo(() => records[selectedSport] || [], [records, selectedSport]);
-
-  // 폼 초기화
-  const resetForm = () => {
-    setEditingFormData({
-      league: '',
-      universityStatKeys: [],
-      universityStats: [
-        { university: University.KOREA_UNIVERSITY, stats: {} },
-        { university: University.YONSEI_UNIVERSITY, stats: {} },
-      ],
-      playerStatsWithCategory: [],
-    });
-  };
 
   // 대학 통계 키 관리
   const handleAddUniversityStatKey = () => {
