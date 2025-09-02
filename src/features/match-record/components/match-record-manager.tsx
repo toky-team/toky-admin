@@ -831,7 +831,7 @@ export function MatchRecordManager() {
       ) : (
         <div className="space-y-4">
           {selectedRecords.map((record) => (
-            <Card key={record.sport} className="p-6">
+            <Card key={`${record.sport}-${record.league}`} className="p-6">
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <div>
