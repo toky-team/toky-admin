@@ -868,12 +868,18 @@ export function MatchRecordManager() {
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <h3 className="text-lg font-semibold">{record.sport}</h3>
-                    <p className="text-sm text-muted-foreground">리그: {record.league}</p>
+                    <p className="text-sm text-muted-foreground">리그 - {record.league}</p>
                     {record.leagueFullName && (
-                      <p className="text-sm text-muted-foreground">리그 전체명: {record.leagueFullName}</p>
+                      <p className="text-sm text-muted-foreground mb-1">리그 전체명 - {record.leagueFullName}</p>
                     )}
                     {record.winningComment && (
-                      <p className="text-sm text-muted-foreground">승부 코멘트: {record.winningComment}</p>
+                      <p className="text-sm text-muted-foreground" style={{ whiteSpace: 'pre-line' }}>
+                        승부 코멘트
+                        <br />
+                        <span className="inline-block mt-1 px-3 py-2 bg-black rounded-md border text-center text-white">
+                          {record.winningComment.replace(/\\n/g, '\n')}
+                        </span>
+                      </p>
                     )}
                   </div>
                   <div className="flex gap-2">
