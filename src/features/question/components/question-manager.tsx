@@ -29,14 +29,14 @@ export function QuestionManager() {
     matchResult: MatchResult;
     kuScore: string;
     yuScore: string;
-    kuPlayer: string;
-    yuPlayer: string;
+    kuPlayer: string[];
+    yuPlayer: string[];
   }>({
     matchResult: MatchResult.KOREA_UNIVERSITY,
     kuScore: '0',
     yuScore: '0',
-    kuPlayer: '',
-    yuPlayer: '',
+    kuPlayer: [],
+    yuPlayer: [],
   });
 
   const handleEditStart = () => {
@@ -76,16 +76,16 @@ export function QuestionManager() {
         matchResult: currentAnswer.predict.matchResult,
         kuScore: currentAnswer.predict.score.kuScore.toString(),
         yuScore: currentAnswer.predict.score.yuScore.toString(),
-        kuPlayer: currentAnswer.kuPlayer.playerId || '',
-        yuPlayer: currentAnswer.yuPlayer.playerId || '',
+        kuPlayer: currentAnswer.kuPlayer.playerId,
+        yuPlayer: currentAnswer.yuPlayer.playerId,
       });
     } else {
       setAnswerForm({
         matchResult: MatchResult.KOREA_UNIVERSITY,
         kuScore: '0',
         yuScore: '0',
-        kuPlayer: '',
-        yuPlayer: '',
+        kuPlayer: [],
+        yuPlayer: [],
       });
     }
     setIsEditingAnswer(true);
@@ -132,10 +132,10 @@ export function QuestionManager() {
         },
       },
       kuPlayer: {
-        playerId: answerForm.kuPlayer || null,
+        playerId: answerForm.kuPlayer,
       },
       yuPlayer: {
-        playerId: answerForm.yuPlayer || null,
+        playerId: answerForm.yuPlayer,
       },
     };
 
@@ -147,6 +147,23 @@ export function QuestionManager() {
     if (confirm('정답을 삭제하시겠습니까?\n\n⚠️ 주의: 이미 지급된 응모권은 회수할 수 없습니다.')) {
       await handleSetAnswer(selectedSport, null);
     }
+  };
+
+  // 선수 추가/제거 핸들러
+  const handleAddPlayer = (university: 'ku' | 'yu', playerId: string) => {
+    const field = university === 'ku' ? 'kuPlayer' : 'yuPlayer';
+    setAnswerForm((prev) => ({
+      ...prev,
+      [field]: [...prev[field], playerId],
+    }));
+  };
+
+  const handleRemovePlayer = (university: 'ku' | 'yu', index: number) => {
+    const field = university === 'ku' ? 'kuPlayer' : 'yuPlayer';
+    setAnswerForm((prev) => ({
+      ...prev,
+      [field]: prev[field].filter((_, i) => i !== index),
+    }));
   };
 
   // 점수 유효성 검사 및 핸들러
@@ -336,31 +353,39 @@ export function QuestionManager() {
                           <strong>점수:</strong> 고려대 {selectedQuestion.answer.predict.score.kuScore} -{' '}
                           {selectedQuestion.answer.predict.score.yuScore} 연세대
                         </div>
-                        {selectedQuestion.answer.kuPlayer.playerId &&
+                        {selectedQuestion.answer.kuPlayer.playerId.length > 0 &&
                           (() => {
-                            const kuPlayer = players[selectedSport]?.[University.KOREA_UNIVERSITY]?.find(
-                              (p) => p.id === selectedQuestion.answer!.kuPlayer.playerId
-                            );
+                            const kuPlayers = selectedQuestion.answer.kuPlayer.playerId
+                              .map((playerId) => {
+                                const player = players[selectedSport]?.[University.KOREA_UNIVERSITY]?.find(
+                                  (p) => p.id === playerId
+                                );
+                                return player
+                                  ? `${player.name}(#${player.backNumber}) - ${player.position}`
+                                  : `ID: ${playerId}`;
+                              })
+                              .join(', ');
                             return (
                               <div>
-                                <strong>고려대 선수:</strong>{' '}
-                                {kuPlayer
-                                  ? `${kuPlayer.name}(#${kuPlayer.backNumber}) - ${kuPlayer.position}`
-                                  : `ID: ${selectedQuestion.answer.kuPlayer.playerId}`}
+                                <strong>고려대 선수:</strong> {kuPlayers}
                               </div>
                             );
                           })()}
-                        {selectedQuestion.answer.yuPlayer.playerId &&
+                        {selectedQuestion.answer.yuPlayer.playerId.length > 0 &&
                           (() => {
-                            const yuPlayer = players[selectedSport]?.[University.YONSEI_UNIVERSITY]?.find(
-                              (p) => p.id === selectedQuestion.answer!.yuPlayer.playerId
-                            );
+                            const yuPlayers = selectedQuestion.answer.yuPlayer.playerId
+                              .map((playerId) => {
+                                const player = players[selectedSport]?.[University.YONSEI_UNIVERSITY]?.find(
+                                  (p) => p.id === playerId
+                                );
+                                return player
+                                  ? `${player.name}(#${player.backNumber}) - ${player.position}`
+                                  : `ID: ${playerId}`;
+                              })
+                              .join(', ');
                             return (
                               <div>
-                                <strong>연세대 선수:</strong>{' '}
-                                {yuPlayer
-                                  ? `${yuPlayer.name}(#${yuPlayer.backNumber}) - ${yuPlayer.position}`
-                                  : `ID: ${selectedQuestion.answer.yuPlayer.playerId}`}
+                                <strong>연세대 선수:</strong> {yuPlayers}
                               </div>
                             );
                           })()}
@@ -464,41 +489,124 @@ export function QuestionManager() {
             })()}
 
             {/* 선수 선택 */}
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <div className="flex-1 max-w-xs">
-                <Label htmlFor="kuPlayer" className="block text-center mb-2">
-                  고려대 선수 (선택사항)
-                </Label>
+            <div className="flex flex-col sm:flex-row justify-center gap-6">
+              {/* 고려대 선수 선택 */}
+              <div className="flex-1 max-w-md">
+                <Label className="block text-center mb-2">고려대 선수 (선택사항)</Label>
+
+                {/* 선택된 선수 목록 */}
+                {answerForm.kuPlayer.length > 0 && (
+                  <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <div className="text-sm font-medium text-red-700 mb-2">선택된 선수:</div>
+                    <div className="space-y-1">
+                      {answerForm.kuPlayer.map((playerId, index) => {
+                        const player = players[selectedSport]?.[University.KOREA_UNIVERSITY]?.find(
+                          (p) => p.id === playerId
+                        );
+                        return (
+                          <div
+                            key={playerId}
+                            className="flex items-center justify-between bg-gray-500 border border-gray-200 p-2 rounded text-sm"
+                          >
+                            <span>
+                              {player
+                                ? `${player.name} (#${player.backNumber}) - ${player.position}`
+                                : `ID: ${playerId}`}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleRemovePlayer('ku', index)}
+                              className="ml-2 px-2 py-1 text-xs"
+                            >
+                              ✕
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* 선수 추가 */}
                 <select
-                  id="kuPlayer"
-                  value={answerForm.kuPlayer}
-                  onChange={(e) => setAnswerForm((prev) => ({ ...prev, kuPlayer: e.target.value }))}
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value && !answerForm.kuPlayer.includes(e.target.value)) {
+                      handleAddPlayer('ku', e.target.value);
+                    }
+                  }}
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-center"
                 >
-                  <option value="">선수 선택 (선택사항)</option>
-                  {players[selectedSport]?.[University.KOREA_UNIVERSITY]?.map((player) => (
-                    <option key={player.id} value={player.id}>
-                      {player.name} (#{player.backNumber}) - {player.position}
-                    </option>
-                  ))}
+                  <option value="">선수 추가하기</option>
+                  {players[selectedSport]?.[University.KOREA_UNIVERSITY]
+                    ?.filter((player) => !answerForm.kuPlayer.includes(player.id))
+                    .map((player) => (
+                      <option key={player.id} value={player.id}>
+                        {player.name} (#{player.backNumber}) - {player.position}
+                      </option>
+                    ))}
                 </select>
               </div>
-              <div className="flex-1 max-w-xs">
-                <Label htmlFor="yuPlayer" className="block text-center mb-2">
-                  연세대 선수 (선택사항)
-                </Label>
+
+              {/* 연세대 선수 선택 */}
+              <div className="flex-1 max-w-md">
+                <Label className="block text-center mb-2">연세대 선수 (선택사항)</Label>
+
+                {/* 선택된 선수 목록 */}
+                {answerForm.yuPlayer.length > 0 && (
+                  <div className="mb-3 p-3 bg-blue-500 border border-blue-200 rounded-md">
+                    <div className="text-sm font-medium text-blue-700 mb-2">선택된 선수:</div>
+                    <div className="space-y-1">
+                      {answerForm.yuPlayer.map((playerId, index) => {
+                        const player = players[selectedSport]?.[University.YONSEI_UNIVERSITY]?.find(
+                          (p) => p.id === playerId
+                        );
+                        return (
+                          <div
+                            key={playerId}
+                            className="flex items-center justify-between bg-grey-100 p-2 rounded text-sm"
+                          >
+                            <span>
+                              {player
+                                ? `${player.name} (#${player.backNumber}) - ${player.position}`
+                                : `ID: ${playerId}`}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleRemovePlayer('yu', index)}
+                              className="ml-2 px-2 py-1 text-xs"
+                            >
+                              ✕
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* 선수 추가 */}
                 <select
-                  id="yuPlayer"
-                  value={answerForm.yuPlayer}
-                  onChange={(e) => setAnswerForm((prev) => ({ ...prev, yuPlayer: e.target.value }))}
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value && !answerForm.yuPlayer.includes(e.target.value)) {
+                      handleAddPlayer('yu', e.target.value);
+                    }
+                  }}
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-center"
                 >
-                  <option value="">선수 선택 (선택사항)</option>
-                  {players[selectedSport]?.[University.YONSEI_UNIVERSITY]?.map((player) => (
-                    <option key={player.id} value={player.id}>
-                      {player.name} (#{player.backNumber}) - {player.position}
-                    </option>
-                  ))}
+                  <option value="">선수 추가하기</option>
+                  {players[selectedSport]?.[University.YONSEI_UNIVERSITY]
+                    ?.filter((player) => !answerForm.yuPlayer.includes(player.id))
+                    .map((player) => (
+                      <option key={player.id} value={player.id}>
+                        {player.name} (#{player.backNumber}) - {player.position}
+                      </option>
+                    ))}
                 </select>
               </div>
             </div>
