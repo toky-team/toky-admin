@@ -1,4 +1,5 @@
 import type { Gift } from '~/features/gift/types/gift';
+import type { RaffleResult } from '~/features/gift/types/raffle-result';
 import api from '~/shared/lib/api';
 
 export const getGifts = async () => {
@@ -55,4 +56,17 @@ export const updateGift = async (
 
 export const deleteGift = async (giftId: string) => {
   return await api.delete(`/admin/gift/${giftId}`);
+};
+
+export const raffleDraw = async (
+  giftId: string,
+  raffleCount: number,
+  excludeDrawIds?: string[],
+  includeAdmin?: boolean
+) => {
+  return await api.post<RaffleResult[]>(`/admin/gift/${giftId}/raffle`, {
+    raffleCount,
+    excludeDrawIds,
+    includeAdmin,
+  });
 };

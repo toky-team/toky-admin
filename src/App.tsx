@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { useAuthInit } from '~/features/auth/hooks/use-auth-init';
 import { Loading } from '~/features/loading/components/loading';
 import ChatPage from '~/pages/chat/chat.page';
+import DrawPage from '~/pages/draw/draw.page';
 import GiftPage from '~/pages/gift/gift.page';
 import HomePage from '~/pages/home/home.page';
 import LikePage from '~/pages/like/like.page';
@@ -44,6 +45,7 @@ export default function App() {
               <Route path="/gift" element={<GiftPage />} />
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/user" element={<UserPage />} />
+              <Route path="/draw" element={<DrawPage />} />
             </Route>
           </Route>
 

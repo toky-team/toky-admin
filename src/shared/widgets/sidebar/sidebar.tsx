@@ -12,6 +12,7 @@ const navItems = [
   { label: '경품 관리', to: '/gift' },
   { label: '채팅 관리', to: '/chat' },
   { label: '사용자 관리', to: '/user' },
+  { label: '경품 추첨', to: '/draw' },
 ];
 
 interface SidebarProps {
