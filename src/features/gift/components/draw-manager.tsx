@@ -50,6 +50,17 @@ export function DrawManager() {
       resetRaffle();
     }
     setSelectedGiftId(giftId);
+
+    // 경품 이름에서 인원 수 추출하여 자동 설정
+    if (giftId) {
+      const selectedGiftData = gifts.find((gift) => gift.id === giftId);
+      if (selectedGiftData) {
+        const match = selectedGiftData.name.match(/\((\d+)명\)$/);
+        if (match) {
+          setRaffleCount(match[1]);
+        }
+      }
+    }
   };
 
   const handleRaffle = async () => {
